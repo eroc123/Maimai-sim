@@ -17,7 +17,7 @@ def load(type, chart):
 def save(chart):
     with open('./test.csv', 'w') as f:
         f.write('#Python MAIMAI simulator chart file\n')
-        f.write('#Version 0.1 Alpha\n\n')
+        f.write('#Version 0.1 \n\n')
         for i in chart:
             line = ''
             for j in i[:-1]:
@@ -107,7 +107,11 @@ def phrase_simai(chart):
             isbreak = False
             if 'b' in i:
                 isbreak = True
-                i = i[:i.index('b')] + i[i.index('b')+1:]
+                while True:
+                    try:
+                        i = i[:i.index('b')] + i[i.index('b')+1:]
+                    except:
+                        break
             if len(i) == 1:
                 note = TapNote()
                 note.ButtonNumber = i

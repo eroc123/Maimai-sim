@@ -1,5 +1,5 @@
 import pygame, math, time
-from loader import TapNote, HoldNote, SlideNote
+FRAMERATE = 60
 
 pygame.init()
 pygame.mixer.init()
@@ -13,18 +13,22 @@ output = TextBox(display, 475, 200, 50, 50, fontSize=30)
 
 
 output.disable()
-from sprites import *
+from loader import TapNote, HoldNote, SlideNote
 
 
 
 def getChart(songId):
     #return loader.phrase_simai(simaichart)
-    testbar = {'timesig': 4, 'bpm': 150, 'notes': [TapNote(), TapNote(), TapNote(), TapNote()]}
-    testbar['notes'][0].buttonNumber = 0
-    testbar['notes'][1].buttonNumber = 1
-    testbar['notes'][2].buttonNumber = 2
-    testbar['notes'][3].buttonNumber = 3
-    return 
+    testbar = [{'timesig': 4, 'bpm': 150, 'notes': [TapNote(), TapNote(), TapNote(), TapNote()]}]
+    testbar[0]['notes'][0].buttonNumber = 0
+    testbar[0]['notes'][1].buttonNumber = 1
+    testbar[0]['notes'][2].buttonNumber = 2
+    testbar[0]['notes'][3].buttonNumber = 3
+    return testbar
+
+
+
+
 
 class SongPlayer():
     def __init__(self, songId, display, speed = 5,):
@@ -32,94 +36,113 @@ class SongPlayer():
         self.songId = 0 #integer for song id - determines the song to play
         self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
 
-        self.FRAMERATE = 60
-        self.tick1 = pygame.mixer.Sound("./assets/sounds/tick1.wav") 
-        self.tick2 = pygame.mixer.Sound("./assets/sounds/tick2.wav")
-        self.speed = speed
-        self.display = display
+        
+        #self.metronometick1 = pygame.mixer.Sound("./assets/sounds/tick1.wav") 
+        #self.metronometick2 = pygame.mixer.Sound("./assets/sounds/tick2.wav")
+        self.speed = speed #note speed
+        self.display = display 
         monitorWidth, monitorHeight = pygame.display.get_window_size()
-        self.radiusConst = monitorHeight * 0.45
-        summonRing = self.radiusConst * 1.7/6.3
-        self.center = (monitorWidth/2, monitorHeight/2)
+        self.radiusConst = monitorHeight * 0.45 #radius of judgement line
+        summonRing = self.radiusConst * 1.7/6.3 #radius of summon ring
+        self.center = (monitorWidth/2, monitorHeight/2) #center of judgement line
         self.ticks = 0
-        self.currentnote = 0
+      
         self.fps = pygame.time.Clock()
-        self.chart,self.bpm = getChart(songId)
-        # buffer = [TapNote(1,0),TapNote(1,1),TapNote(1,2),TapNote(1,3),TapNote(1,4),TapNote(1,5),TapNote(1,6),TapNote(1,7)]
-        self.buffer = []
+        self.phrasedchart = getChart(songId)
+
+        # self.buffer = []
         
         self.bar = 0
         self.barfraction = 0
         self.soundDelay = (self.radiusConst/((math.log(speed) + 1)* self.radiusConst * 0.1/20))
-        self.tickBuffer = []
-        self.tickCount = 0
-        print((self.FRAMERATE * 60) / self.bpm)
+     
+        # self.tickCount = 0
+        # print((self.FRAMERATE * 60) / self.bpm)
         self.chartimg = pygame.image.load("assets/images/chart.png").convert() #circle in the middle - judgement line
         self.chartimg = pygame.transform.scale(self.chartimg,(monitorHeight,monitorHeight)) 
         self.chartpos = self.chartimg.get_rect(center = self.display.get_rect().center) 
         #chartendimg is used to hide the note when it reaches outside
         self.chartendimg = pygame.image.load("assets/images/chart-end.png").convert_alpha()
         self.chartendimg = pygame.transform.scale(self.chartendimg,(monitorHeight,monitorHeight))
-        
-        self.phrasedChart = getChart(songId)
- 
-        pass
+    
+    
 
     def play(self,):
+        # load music 
         pygame.mixer.music.load('./assets/sounds/track.mp3')
         pygame.mixer.music.play()
+        
+        
+
+        #load bar to read
+        #main game engine
+        currentbarfraction = 0
         while True:
-
-            output.setText(slider.getValue())
-            self.fps.tick(self.FRAMERATE)
+            self.fps.tick(FRAMERATE)
             
-
-            # update screen/delete object
-            # if self.ticks == int(self.soundDelay) + 200:
-                
-            self.display.fill((0,0,0))
-            print(int(self.ticks % ((self.FRAMERATE * 60) / self.bpm)))
-            if int(self.ticks % ((self.FRAMERATE * 60) / self.bpm)) == int(0.0):
-                self.barfraction += 1
-                self.tickBuffer.append(self.ticks + self.soundDelay)
-                if self.barfraction == self.timesig:
-                    self.bar += 1
-                    
-                    self.barfraction = 0
-                if self.bar == 0:
-                    self.display.fill((20,20,20))
-            print(self.bar, self.barfraction)
-            # if ticks == tickBuffer[0]:
-            #     tickCount += 1
-            #     tickBuffer.remove(ticks)
-            #     if tickCount == 1:
-            #         pygame.mixer.Channel(0).play(tick1)
-                    
-            #     else:
-            #         pygame.mixer.Channel(0).play(tick2)
-            #     if tickCount == timesig:
-            #         tickCount = 0
-            self.buffer, self.chart = self.phraser.checkTime(self.chart, self.buffer, self.bar, self.barfraction)
-            
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key== pygame.K_ESCAPE:
-                        pygame.quit()
-            
+            currentbar = self.phrasedchart[self.bar]
             
             self.display.blit(self.chartimg, self.chartpos)
-            for note in self.buffer:
-                image, pos = note.update()
-                self.display.blit(image, pos)
-                if math.sqrt((pos[0] - self.center[0] + image.get_rect().centerx)**2 + (pos[1] - self.center[1] + image.get_rect().centery)**2) > self.radiusConst * 1.05:
-                    self.buffer.remove(note)
+
+            # display notes in between
             self.display.blit(self.chartendimg, self.chartpos)
 
             pygame.display.update()
-            self.ticks += 1
+
+        loadBar()
+
+        #while True:
+
+            # output.setText(slider.getValue())
+            # self.fps.tick(self.FRAMERATE)
+            
+
+            # # update screen/delete object
+            # # if self.ticks == int(self.soundDelay) + 200:
+                
+            # self.display.fill((0,0,0))
+            # # print(int(self.ticks % ((self.FRAMERATE * 60) / self.bpm)))
+            # if int(self.ticks % ((self.FRAMERATE * 60) / self.bpm)) == int(0.0):
+            #     self.barfraction += 1
+            #     self.tickBuffer.append(self.ticks + self.soundDelay)
+            #     if self.barfraction == self.timesig:
+            #         self.bar += 1
+                    
+            #         self.barfraction = 0
+            #     if self.bar == 0:
+            #         self.display.fill((20,20,20))
+            # print(self.bar, self.barfraction)
+            # # if ticks == tickBuffer[0]:
+            # #     tickCount += 1
+            # #     tickBuffer.remove(ticks)
+            # #     if tickCount == 1:
+            # #         pygame.mixer.Channel(0).play(tick1)
+                    
+            # #     else:
+            # #         pygame.mixer.Channel(0).play(tick2)
+            # #     if tickCount == timesig:
+            # #         tickCount = 0
+            # #self.buffer, self.chart = self.phraser.checkTime(self.chart, self.buffer, self.bar, self.barfraction)
+            
+
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         pygame.quit()
+            #     if event.type == pygame.KEYDOWN:
+            #         if event.key== pygame.K_ESCAPE:
+            #             pygame.quit()
+            
+            
+            # self.display.blit(self.chartimg, self.chartpos)
+            # for note in self.buffer:
+            #     image, pos = note.update()
+            #     self.display.blit(image, pos)
+            #     if math.sqrt((pos[0] - self.center[0] + image.get_rect().centerx)**2 + (pos[1] - self.center[1] + image.get_rect().centery)**2) > self.radiusConst * 1.05:
+            #         self.buffer.remove(note)
+            # self.display.blit(self.chartendimg, self.chartpos)
+
+            # pygame.display.update()
+            # self.ticks += 1
 
         
 
@@ -177,8 +200,7 @@ class SongPlayer():
 #         return buffer, chart
 
 
-simaichart = '''
-(119){4},
+simaichart = '''(119){4},
 {4}3,3,4,4,
 {4}5,5,6,,
 {4}7,7,8,8,
@@ -321,4 +343,6 @@ E'''
 
 c = SongPlayer(1, display, 10)
 
+
+#play the whole thing
 c.play()

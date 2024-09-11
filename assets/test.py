@@ -22,7 +22,11 @@ def phrase_simai(chart):
             isbreak = False
             if 'b' in i:
                 isbreak = True
-                i = i[:i.index('b')] + i[i.index('b')+1:]
+                while True:
+                    try:
+                        i = i[:i.index('b')] + i[i.index('b')+1:]
+                    except:
+                        break
             
             if len(i) == 1:
                 note = TapNote()
