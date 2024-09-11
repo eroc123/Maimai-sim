@@ -1,5 +1,5 @@
 import pygame, math, time
-import loader
+from loader import TapNote, HoldNote, SlideNote
 
 pygame.init()
 pygame.mixer.init()
@@ -10,16 +10,28 @@ from pygame_widgets.textbox import TextBox
 slider = Slider(display, 0, 0, 400, 20, min=0, max=999, step=1)
 output = TextBox(display, 475, 200, 50, 50, fontSize=30)    
 
+
+
 output.disable()
 from sprites import *
 
 
 
 def getChart(songId):
-    return loader.phrase_simai(simaichart)
+    #return loader.phrase_simai(simaichart)
+    testbar = {'timesig': 4, 'bpm': 150, 'notes': [TapNote(), TapNote(), TapNote(), TapNote()]}
+    testbar['notes'][0].buttonNumber = 0
+    testbar['notes'][1].buttonNumber = 1
+    testbar['notes'][2].buttonNumber = 2
+    testbar['notes'][3].buttonNumber = 3
+    return 
 
 class SongPlayer():
     def __init__(self, songId, display, speed = 5,):
+
+        self.songId = 0 #integer for song id - determines the song to play
+        self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
+
         self.FRAMERATE = 60
         self.tick1 = pygame.mixer.Sound("./assets/sounds/tick1.wav") 
         self.tick2 = pygame.mixer.Sound("./assets/sounds/tick2.wav")
@@ -35,23 +47,24 @@ class SongPlayer():
         self.chart,self.bpm = getChart(songId)
         # buffer = [TapNote(1,0),TapNote(1,1),TapNote(1,2),TapNote(1,3),TapNote(1,4),TapNote(1,5),TapNote(1,6),TapNote(1,7)]
         self.buffer = []
-        self.ticks = 0
+        
         self.bar = 0
         self.barfraction = 0
         self.soundDelay = (self.radiusConst/((math.log(speed) + 1)* self.radiusConst * 0.1/20))
         self.tickBuffer = []
         self.tickCount = 0
         print((self.FRAMERATE * 60) / self.bpm)
-        self.chartimg = pygame.image.load("assets/images/chart.png").convert()
-        self.chartimg = pygame.transform.scale(self.chartimg,(monitorHeight,monitorHeight))
-        self.chartpos = self.chartimg.get_rect(center = self.display.get_rect().center)
+        self.chartimg = pygame.image.load("assets/images/chart.png").convert() #circle in the middle - judgement line
+        self.chartimg = pygame.transform.scale(self.chartimg,(monitorHeight,monitorHeight)) 
+        self.chartpos = self.chartimg.get_rect(center = self.display.get_rect().center) 
         #chartendimg is used to hide the note when it reaches outside
         self.chartendimg = pygame.image.load("assets/images/chart-end.png").convert_alpha()
         self.chartendimg = pygame.transform.scale(self.chartendimg,(monitorHeight,monitorHeight))
-        self.timesig = 4
-        self.phraser = chartPhraser(self.speed, self.timesig)
-
+        
+        self.phrasedChart = getChart(songId)
+ 
         pass
+
     def play(self,):
         pygame.mixer.music.load('./assets/sounds/track.mp3')
         pygame.mixer.music.play()
@@ -110,51 +123,58 @@ class SongPlayer():
 
         
 
-class chartPhraser():
-    def __init__(self, speed, timesig):
-        self.holdbuffer = []
-        self.holdbodylock = 0
-        self.speed = speed
-        self.timesig = timesig
+# class chartPhraser():
+#     def __init__(self, speed, timesig):
+#         self.holdbuffer = []
+#         self.holdbodylock = 0
+#         self.speed = speed
+#         self.timesig = timesig
         
-    def phraseHold(self, buffer, duration, bar, barfraction, note):
-        tail = None
-        if note[0] == 'hold':
-            if note[1] == bar and note[2] == barfraction:
-                tail = HoldTail(self.speed, note[3])
-                buffer.append(tail)
-                self.holdbuffer.append([tail, duration, bar, barfraction])
-        for hold in self.holdbuffer:
-            baroffset = 0
-            duration = hold[1]
-            if duration > 3:
-                duration = int(duration%self.timesig)
-                baroffset = int(duration/self.timesig)
+#     def phraseHold(self, buffer, duration, bar, barfraction, note):
+#         tail = None
+#         if note[0] == 'hold':
+#             if note[1] == bar and note[2] == barfraction:
+#                 tail = HoldTail(self.speed, note[3])
+#                 buffer.append(tail)
+#                 self.holdbuffer.append([tail, duration, bar, barfraction])
+#         for hold in self.holdbuffer:
+#             baroffset = 0
+#             duration = hold[1]
+#             if duration > 3:
+#                 duration = int(duration%self.timesig)
+#                 baroffset = int(duration/self.timesig)
             
-            if hold[2] + baroffset == bar and hold[3] + duration == barfraction:
-                hold[0].locked = False
-                self.holdbuffer.remove(hold)
-            elif hold[2] + baroffset >= bar and hold[3] + duration >= barfraction:
-                if tail == None and hold[0].locked == True:
-                    self.buffer.append(HoldBody(self.speed, hold[0].button))
+#             if hold[2] + baroffset == bar and hold[3] + duration == barfraction:
+#                 hold[0].locked = False
+#                 self.holdbuffer.remove(hold)
+#             elif hold[2] + baroffset >= bar and hold[3] + duration >= barfraction:
+#                 if tail == None and hold[0].locked == True:
+#                     self.buffer.append(HoldBody(self.speed, hold[0].button))
 
         
-        return buffer
+#         return buffer
 
 
-    def checkTime(self, chart, buffer, bar, barfraction):
-        for note in chart:
-            buffer = self.phraseHold(buffer, note[4], bar, barfraction, note)
-            if note[1] == bar and note[2] == barfraction:
-                if note[0] == 'tap':
-                    buffer.append(TapNote(self.speed,note[3]))
-                    chart.remove(note)
-                    break
-                if note[0] == 'hold':
-                    buffer.append(HoldHead(self.speed, note[3]))
-                    chart.remove(note)
-                    break # for double notes just dont break
-        return buffer, chart
+#     def checkTime(self, chart, buffer, bar, barfraction):
+#         for note in chart:
+#             buffer = self.phraseHold(buffer, note[4], bar, barfraction, note)
+#             if note[1] == bar and note[2] == barfraction:
+#                 if note[0] == 'tap':
+#                     if note[4]:
+#                         tapnote = TapNote(self.speed,note[3])
+#                         tapnote.double()
+#                         buffer.append(tapnote)
+
+#                         chart.remove(note)
+#                     else:
+#                         buffer.append(TapNote(self.speed,note[3]))
+#                         chart.remove(note)
+#                     break
+#                 if note[0] == 'hold':
+#                     buffer.append(HoldHead(self.speed, note[3]))
+#                     chart.remove(note)
+#                     break # for double notes just dont break
+#         return buffer, chart
 
 
 simaichart = '''

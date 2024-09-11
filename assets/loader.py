@@ -1,9 +1,9 @@
 #assets/loader.py
 import os
 import math
-
+import sprites
 chart = [['note', 0, 0, False, False],['note', 1, 0, False, False],['note', 2, 0 , False, False],['slide', 3, 0, 3, 2, [1,2,3,4,5], False, False],['slide', 3, 0, 3, 3, [1,2,3,4,5], False, False]]
-
+'''
 def load(type, chart):
     for i in chart:
         type = i['type']
@@ -33,11 +33,11 @@ def open(file):
         else:
             pass
 
-'''
-[type, bar, bar_fraction, button_start, button_end, duration, [cord], break, double] #slide
-[type, bar, bar_fraction, button, break, double] #note
-[type, bar, bar_fraction, button, duration, break, double] #hold
-'''
+
+# [type, bar, bar_fraction, button_start, button_end, duration, [cord], break, double] #slide
+# [type, bar, bar_fraction, button, break, double] #note
+# [type, bar, bar_fraction, button, duration, break, double] #hold
+
 
 def phraseHold(speed : float, button : int, beat : int, duration : float, breaknote, doublenote, timesig , bar) -> list:
     # bolierplate code that hopefully works
@@ -65,86 +65,141 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 
     
     
-    return head+body+end
+    return head+body+end'''
 
+['(119){1}', '{4}3', '3', '4', '4', '{4}5', '5', '6', '', '{4}7', '7', '8', '8', '{4}1', '1', '2', '', '{4}3', '3/4', '3', '3/4', '{4}6', '5/6', '6', '5/6', '{4}4/5', '3/6', '4/5', '3/6', '{4}4/5', '3/6', '2b/7b', '', '{4}5/6', '5/6', '3/4', '3/4', '{4}5/6', '3/4', '5b/6b', '', '{4}3/4', '3/4', '5/6', '5/6', '{4}3/4', '5/6', '3b/4b', '', '{4}6h[4:1]', '5', '6h[4:1]', '5', '{4}3h[4:1]', '4', '3h[4:1]', '4', '{4}6h[4:1]', '5', '6h[4:1]', '5', '{4}3h[4:1]', '4', '4/5', '', '{4}7/8', '7/8', '1/2', '1/2', '{4}7/8', '1/2', '7b/8b', '', '{4}1/2', '1/2', '7/8', '7/8', '{4}1/2', '7/8', '1b/2b', '', '{4}7h[4:1]', '8', '7h[4:1]', '8', '{4}2h[4:1]', '1', '2h[4:1]', '1', '{4}7h[4:1]', '8', '7h[4:1]', '8', '{4}2h[4:1]', '1', '1/8', '', '{4}3h[4:3]', '', '4', '4', '{4}6h[4:3]', '', '5', '5', '{4}7h[4:3]', '', '8', '8', '{4}2h[4:3]', '', '1', '1', '{4}8', '8', '7', '7', '{4}6', '6', '5', '5', '{4}4', '4', '3', '3', '{4}2', '2', '1h[4:1]', '8b', '{4}1', '2', '3', '4', '{4}5', '6', '7', '1/8', '{4}8', '7', '6', '5', '{4}4', '3', '2', '1/8', '{4}8', '1/7', '8', '1/7', '{4}1', '2/8', '1', '2/8', '{4}8', '1/7', '1', '2/8', '{4}1/8', '2/7', '3b/6b', '', '{1}3-8[2:1]/4-7[2:1]', '{4}1', '1', '2h[4:1]', '', '{1}1-6[2:1]/2-5[2:1]', '{4}7', '7', '8h[4:1]', '', '{4}8', '7', '6', '5', '{4}1', '2', '3', '4', '{4}4/5', '3/6', '4/5', '3/6', '{4}2/7', '2/7', '2b/7b', '', '{4}7/8', '1/6', '1/2', '3/8', '{4}7/8', '1/2', '7b/8b', '', '{4}1/2', '3/8', '7/8', '1/6', '{4}1/2', '7/8', '1b/2b', '', '{4}7h[4:1]', '8', '2h[4:1]', '1', '{4}7h[4:1]', '8', '2h[4:1]', '1', '{4}1/8', '1/8', '2/7', '2/7', '{4}1/8', '2/7', '3b/6b', '', '{4}3/4', '2/5', '5/6', '4/7', '{4}3/4', '5/6', '3b/4b', '', '{4}5/6', '4/7', '3/4', '2/5', '{4}5/6', '3/4', '5b/6b', '', '{4}3h[4:1]', '4', '6h[4:1]', '5', '{4}3h[4:1]', '4', '6h[4:1]', '5', '{4}4/5', '4/5', '3/6', '3/6', '{4}4/5', '3/6', '2b/7b', '', '{4}8', '8', '1', '1', '{4}2', '2', '3', '', '{4}4', '4', '5', '5', '{4}6', '6', '7', '', '{4}2', '1/2', '2', '1/2', '{4}7', '7/8', '7', '7/8', '{4}1/8', '2/7', '1/8', '2/7', '{4}1/8', '2/7', '3b/6b', '', '{1}', '{1}', '{1}', 'E'] 
+
+
+# def phraseBar(bar):
+#     print(bar)
+#     if '(' in bar and ')' in bar:
+#         bpm = bar[1:bar.index(')')]
+#     timesig = bar[bar.index('{'):bar.index('}')]
+
+#     notes = bar.split(',')
+#     print(notes)
+#     bar = {
+#         'bpm': bpm, #beats per minute, to get time
+#         'timesig':timesig, #number e.g. 4. Fraction is always out of 4 (4)quarter notes so 7 would be 7/4 time signature            
+#         'notes':notes, #list type
+#         }
+#     return bar
+    
 def phrase_simai(chart):
-    chart = chart.replace('\n','')
-    chart = chart.split(',')
-    bpm = chart[0].split(')')[0].split('(')[1]
+    chart = chart.split('\n')
+    bpm = 120
+    phrasedchart = []
+    for bar in chart:
+        if 'E' in bar:
+            continue
+        if '(' in bar and ')' in bar:
+            bpm = bar[1:bar.index(')')]
+            bar = bar[bar.index(')')+1:]
+        
+        timesig = bar[bar.index('{')+1:bar.index('}')]
+        bar = bar[:bar.index('{')] + bar[bar.index('}')+1:]
+        barNumber = 0
+        barFraction = 0
+        notes = bar.split(',')
+        notes = notes[:-1]
+        phrasednotes = []
+        for i in notes:
+            isbreak = False
+            if 'b' in i:
+                isbreak = True
+                i = i[:i.index('b')] + i[i.index('b')+1:]
+            if len(i) == 1:
+                note = TapNote()
+                note.ButtonNumber = i
+                note.barNumber = barNumber
+                note.barFraction = barFraction
+                note.sprite = sprites.TapNote()
+                note.breakNote = isbreak
+                phrasednotes.append(note)
+            if '/' in i and len(i) == 3:
+                note = TapNote()
+                note.ButtonNumber = i.split('/')[0]
+                note.barNumber = barNumber
+                note.barFraction = barFraction
+                note.sprite = sprites.TapNote()
+                note.sprite.double()
+                note.breakNote = isbreak
+                phrasednotes.append(note)
+                note = TapNote()
+                note.ButtonNumber = i.split('/')[1]
+                note.barNumber = barNumber
+                note.barFraction = barFraction
+                note.sprite = sprites.TapNote()
+                note.sprite.double()
+                note.breakNote = isbreak
+                phrasednotes.append(note)
+            if 'h' in i and not '/' in i:
+                note = HoldNote()
+                note.ButtonNumber = i[0]
+                note.barNumber = barNumber
+                note.barFraction = barFraction
+                note.divider = i.split(':')[0][-1]
+                note.duration = i.split(':')[1][0]
+                note.headSprite = sprites.HoldHead()
+                note.tailSprite = sprites.HoldTail()
+                note.segmentSprite  = sprites.HoldBody()
+                note.breakNote = isbreak
+                phrasednotes.append(note)
+
+            barFraction += 1
+            if barFraction == timesig:
+                barFraction = 0
+                barNumber += 1
+        bar = {
+            'bpm': int(bpm), #beats per minute, to get time
+            'timesig': int(timesig), #number e.g. 4. Fraction is always out of 4 (4)quarter notes so 7 would be 7/4 time signature            
+            'notes':phrasednotes, #list type
+            }
+        phrasedchart.append(bar)
+    print(phrasedchart, bpm)
     #print(bpm)
     bar = 1
     lastbar = -1
     chartlist = []
-    for i in chart:
-        try:
-            notefraction = 1/int(i.split('{')[1].split('}')[0])
-            #print(notefraction, ' notefraction')
-        except IndexError: #shows that there is no {}, therefore no notefraction change
-            button = i
-            if i == '': #no note, rest
-                bar += notefraction
-                if bar > lastbar: #new bar
-                    lastbar = bar
-                continue
-            if len(button) > 1: #more than one means its not a single tap note
-                if '/' in button:
-                    notes = button.split('/')
-                    isbreak = False
-                    if 'b' in notes[0]:
-                        note = ['tap', math.trunc(bar), ((bar - math.trunc(bar))/notefraction), int(notes[0][0])-1, True, True]
-                    else:
-                        note = ['tap', math.trunc(bar), ((bar - math.trunc(bar))/notefraction), int(notes[0])-1, False, True]
-                    if 'b' in notes[1]:
-                        note = ['tap', math.trunc(bar), ((bar - math.trunc(bar))/notefraction), int(notes[1][0])-1, True, True]
-                    else:
-                        note = ['tap', math.trunc(bar), ((bar - math.trunc(bar))/notefraction), int(notes[1])-1, False, True]
-                if 'h' in button:
-                    holdnote = button.split('h')
-                    duration = int(holdnote[1].split(':')[1][0])*int(holdnote[1].split(':')[0][1])
-                    note = ['hold', math.trunc(bar), ((bar - math.trunc(bar))/notefraction), int(holdnote[0])-1, duration, False, False]
-                chartlist.append(note)
-                bar += notefraction
-                if bar > lastbar: #new bar
-                    lastbar = bar
-                continue
-            elif button == 'E':
-                #print('Finished Chart')
-                continue
-            elif button == ' ':
-                bar += notefraction
-                if bar > lastbar: #new bar
-                    lastbar = bar
-                continue
-            else:
-                button = int(button)
-            
-            note = ['tap', math.trunc(bar), (bar - math.trunc(bar))/notefraction, button-1, False, False]
-            chartlist.append(note)
-            bar += notefraction
-            if bar > lastbar: #new bar
-                lastbar = bar
-        else:
-            button = i.split('}')[1]
-            if button == '':
-                continue
-            else:
-                if len(button) > 1:
-                    continue
-                else:
-                    button = int(button)
-            
-            note = ['tap', math.trunc(bar), (bar - math.trunc(bar))/notefraction,  button-1, False, False]
-            chartlist.append(note)
-            bar += notefraction
-            if bar > lastbar: #new bar
-                lastbar = bar
 
-    # for i in chartlist:
-    #     if i[2] != 0:
-    #         i[2] = int(1/i[2])
-    #     else:
-    #         i[2] = 0
-    return chartlist, int(bpm)
+    
+    return chartlist
+
+class Note:
+    def __init__(self):
+        self.buttonNumber = 0 #from 0 to 7
+        self.barNumber = 0
+        self.barFraction = 0 #depends on time signature, from 0 to (time signature-1). 
+        self.breakNote = False #false or true, breaknotes provide extra points
+        self.doubleNote = False #if true then graphics is yellow
+        self.sprite = None
+
+class TapNote(Note):
+    def __init__(self):
+        super().__init__()
+    
+
+
+class HoldNote(Note):
+    def __init__(self):
+        super().__init__()
+        self.divider = 1 #1 is whole note, 2 is half note, 4 is quarter note, 8 is eigth note etc.
+        self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
+        self.headSprite = None #head of hold note
+        self.tailSprite = None #tail of hold note
+        self.segmentSprite = None #segment of hold note
+class SlideNote(HoldNote):
+    def __init__(self):
+        super().__init__()
+        self.pattern = ""
+        self.destinationButton = 0 #button where the slide ends
+        self.starGraphic = None #is the star graphic 
+        self.arrowGraphic = None #is the graphic of the arrow from the star arrival button to destination button
+
+class TouchNote():
+    def __init__(self):
+        pass
+
 
 chart = '''
 (119){1},
@@ -225,6 +280,4 @@ chart = '''
 {1},
 E'''
 
-chart, bpm = phrase_simai(chart)
-for i in chart:
-    print(i)
+# (phrase_simai(chart))
