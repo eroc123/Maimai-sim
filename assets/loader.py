@@ -88,7 +88,9 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 def phrase_simai(chart):
     chart = chart.split('\n')
     bpm = 120
+    speed = 5
     phrasedchart = []
+    barNumber = 0
     for bar in chart:
         if 'E' in bar:
             continue
@@ -98,13 +100,15 @@ def phrase_simai(chart):
         
         timesig = bar[bar.index('{')+1:bar.index('}')]
         bar = bar[:bar.index('{')] + bar[bar.index('}')+1:]
-        barNumber = 0
+        
         barFraction = 0
+        
         notes = bar.split(',')
         notes = notes[:-1]
         phrasednotes = []
         for i in notes:
             isbreak = False
+            isdouble = False
             if 'b' in i:
                 isbreak = True
                 while True:
@@ -112,62 +116,90 @@ def phrase_simai(chart):
                         i = i[:i.index('b')] + i[i.index('b')+1:]
                     except:
                         break
+            if '/' in i:
+                isdouble = True
+                j = i
+                i = j.split('/')[1]
+                if len(i) == 1:
+                    note = TapNote()
+                    note.buttonNumber = int(i) - 1
+                    note.barNumber = barNumber
+                    note.barFraction = barFraction
+                    note.sprite = sprites.TapNote(note.buttonNumber)
+                    note.breakNote = isbreak
+                    note.doubleNote = isdouble
+                    if isdouble:
+                        note.sprite.double()
+                    phrasednotes.append(note)
+            
+                if 'h' in i:
+                    note = HoldNote()
+
+                    note.buttonNumber = int(i[0]) - 1
+                    note.barNumber = barNumber
+                    note.barFraction = barFraction
+                    note.divider = int(i.split(':')[0][-1])
+                    note.duration = int(i.split(':')[1][0])
+                    
+                    note.headSprite = sprites.HoldHead(note.buttonNumber)
+                    note.tailSprite = sprites.HoldTail(note.buttonNumber)
+                    note.segmentSprite  = sprites.HoldBody(note.buttonNumber)
+                    note.breakNote = isbreak
+                    note.doubleNote = isdouble
+                    if isdouble:
+                        note.headSprite.double()
+                        note.tailSprite.double()
+                        note.segmentSprite.double()
+                    phrasednotes.append(note)
+                i = j.split('/')[0]
             if len(i) == 1:
                 note = TapNote()
-                note.ButtonNumber = i
+                note.buttonNumber = int(i) - 1
                 note.barNumber = barNumber
                 note.barFraction = barFraction
-                note.sprite = sprites.TapNote()
+                note.sprite = sprites.TapNote(note.buttonNumber)
                 note.breakNote = isbreak
+                note.doubleNote = isdouble
+                if isdouble:
+                    note.sprite.double()
                 phrasednotes.append(note)
-            if '/' in i and len(i) == 3:
-                note = TapNote()
-                note.ButtonNumber = i.split('/')[0]
-                note.barNumber = barNumber
-                note.barFraction = barFraction
-                note.sprite = sprites.TapNote()
-                note.sprite.double()
-                note.breakNote = isbreak
-                phrasednotes.append(note)
-                note = TapNote()
-                note.ButtonNumber = i.split('/')[1]
-                note.barNumber = barNumber
-                note.barFraction = barFraction
-                note.sprite = sprites.TapNote()
-                note.sprite.double()
-                note.breakNote = isbreak
-                phrasednotes.append(note)
-            if 'h' in i and not '/' in i:
+           
+            if 'h' in i:
                 note = HoldNote()
-                note.ButtonNumber = i[0]
+
+                note.buttonNumber = int(i[0]) - 1
                 note.barNumber = barNumber
                 note.barFraction = barFraction
-                note.divider = i.split(':')[0][-1]
-                note.duration = i.split(':')[1][0]
-                note.headSprite = sprites.HoldHead()
-                note.tailSprite = sprites.HoldTail()
-                note.segmentSprite  = sprites.HoldBody()
+                note.divider = int(i.split(':')[0][-1])
+                note.duration = int(i.split(':')[1][0])
+                
+                note.headSprite = sprites.HoldHead(note.buttonNumber)
+                note.tailSprite = sprites.HoldTail(note.buttonNumber)
+                note.segmentSprite  = sprites.HoldBody(note.buttonNumber)
                 note.breakNote = isbreak
+                note.doubleNote = isdouble
+                if isdouble:
+                    note.headSprite.double()
+                    note.tailSprite.double()
+                    note.segmentSprite.double()
                 phrasednotes.append(note)
+            
+            
 
             barFraction += 1
-            if barFraction == timesig:
-                barFraction = 0
-                barNumber += 1
+            # print(barFraction, barNumber, timesig)
+        
         bar = {
             'bpm': int(bpm), #beats per minute, to get time
             'timesig': int(timesig), #number e.g. 4. Fraction is always out of 4 (4)quarter notes so 7 would be 7/4 time signature            
             'notes':phrasednotes, #list type
             }
         phrasedchart.append(bar)
-    print(phrasedchart, bpm)
-    #print(bpm)
-    bar = 1
-    lastbar = -1
-    chartlist = []
+        barNumber += 1
+    
 
     
-    return chartlist
+    return phrasedchart
 
 class Note:
     def __init__(self):
@@ -179,19 +211,32 @@ class Note:
         self.sprite = None
 
 class TapNote(Note):
+    name = 'TapNote'
     def __init__(self):
         super().__init__()
     
 
 
 class HoldNote(Note):
+    name = 'HoldNote'
     def __init__(self):
         super().__init__()
         self.divider = 1 #1 is whole note, 2 is half note, 4 is quarter note, 8 is eigth note etc.
         self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
         self.headSprite = None #head of hold note
         self.tailSprite = None #tail of hold note
-        self.segmentSprite = None #segment of hold note
+        self.issegment = False
+    def segment(self,button):
+        self.bodySprite = False
+        if self.issegment:
+            self.bodySprite = sprites.HoldBody(button)
+            if self.doubleNote:
+                self.bodySprite.double()
+            self.issegment = False
+        else:
+            self.issegment = True
+            
+        return self.bodySprite  #segment of hold note
 class SlideNote(HoldNote):
     def __init__(self):
         super().__init__()
