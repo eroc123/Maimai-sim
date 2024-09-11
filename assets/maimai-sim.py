@@ -146,26 +146,32 @@ class SongPlayer():
         bar = 0
         self.displaybuffer = []
         holdbuffer = []
+        # seperate loop that runs every 1/16th of a beat
+        # higher accuracy may be needed later on 
         while True:
             currentbar = chart[bar]
             notes = currentbar['notes']
-            # tpb : time per beat in ms
+            # tpb : time per 1/16th beat in ms
             tpb = int(1/(currentbar['bpm']/(60*1000))/16)
             
             # print(tpb)
             while True:
-                # print(self.displaybuffer)
+                # Go through the current bar
                 for note in notes:
+                    # Check if the current 16th beat is the one to display the note for
                     if note.barFraction == currentbarfraction:
+                        # Different note types
                         if note.name == 'TapNote':
                             self.displaybuffer.append(note.sprite)
                         if note.name == 'HoldNote':
                             self.displaybuffer.append(note.headSprite)
                             self.displaybuffer.append(note.tailSprite)
+                            # Fix for note sprite so that they appear consistant to the offical game play
                             note.headSprite.update(25)
                             note.tailSprite.locked = False
                             note.tailSprite.update(-25)
                             note.tailSprite.locked = True
+                            # Keep track of the current hold notes that are being displayed
                             holdbuffer.append(note)
 
                 # Look through the hold buffer to find out when to allow the tail note to move
@@ -178,10 +184,13 @@ class SongPlayer():
                         endBar += 1
                     # print(endFraction,endBar, currentbarfraction, bar)
                     if endFraction <= currentbarfraction and endBar == bar:
+                        # unlock the tail note so that it can move
                         i.tailSprite.locked = False
                         holdbuffer.remove(i)
+
                         # print('removed')
                     else:
+                        # otherwise display a hold body note
                         # print(i.buttonNumber)
                         sprite = i.segment(i.buttonNumber)
                         if sprite:
@@ -192,14 +201,20 @@ class SongPlayer():
                         # if note.__name__ == 'HoldNo':
                         #     note.tailSprite.locked = True
 
-                actrualms = pygame.time.delay(tpb)
+                # if game is inconsistant, check actualms to compare the actual milisecond time plaused and compare to the tpb
+                actualms = pygame.time.delay(tpb)
+
+                # since each loop cycle is 1/16th of the beat, incrument 1/16
                 currentbarfraction += 1/16
+
+                # if end of the bar, incrument bar
                 if int(currentbarfraction) == currentbar['timesig']:
                     bar += 1
                     currentbarfraction = 0
                     break
 
     def load_music(self):
+        # load the music, calculate time offset
         offset = -0.0
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
@@ -213,11 +228,15 @@ class SongPlayer():
         #load bar to read
         pygame.mixer.music.load('./assets/sounds/track.mp3')
         threading.Thread(target=self.load_music,daemon=True).start()
+        
+        # here need finetune offset
         time.sleep(2)
+
         #main game engine
         threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon=True).start()
                 
         while True:
+            # Tick FRAMERATE times per second
             self.fps.tick(FRAMERATE)
 
             self.display.blit(self.chartimg, self.chartpos)
@@ -239,7 +258,7 @@ class SongPlayer():
 
             pygame.display.update()
 
-        loadBar()
+
 
         #while True:
 

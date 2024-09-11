@@ -227,6 +227,8 @@ class HoldNote(Note):
         self.tailSprite = None #tail of hold note
         self.issegment = False
     def segment(self,button):
+        # return a new segment sprite
+        # issegment used to reduce cpu and memory usage, only return every two checks i.e. every 1/8th beat
         self.bodySprite = False
         if self.issegment:
             self.bodySprite = sprites.HoldBody(button)
