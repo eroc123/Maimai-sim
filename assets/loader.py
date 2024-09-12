@@ -225,18 +225,13 @@ class HoldNote(Note):
         self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
         self.headSprite = None #head of hold note
         self.tailSprite = None #tail of hold note
-        self.issegment = False
+        
     def segment(self,button):
         # return a new segment sprite
         # issegment used to reduce cpu and memory usage, only return every two checks i.e. every 1/8th beat
-        self.bodySprite = False
-        if self.issegment:
-            self.bodySprite = sprites.HoldBody(button)
-            if self.doubleNote:
-                self.bodySprite.double()
-            self.issegment = False
-        else:
-            self.issegment = True
+        self.bodySprite = sprites.HoldBody(button)
+        if self.doubleNote:
+            self.bodySprite.double()
             
         return self.bodySprite  #segment of hold note
 class SlideNote(HoldNote):
