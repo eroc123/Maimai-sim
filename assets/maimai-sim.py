@@ -18,7 +18,7 @@ from loader import phrase_simai
 
 
 
-def getChart(songId):
+def getChart(songId, speedMs):
     #return loader.phrase_simai(simaichart)
     
     simaichart = '''(119){1},
@@ -98,7 +98,7 @@ def getChart(songId):
 {1},
 {1},
 E'''
-    chart = phrase_simai(simaichart)
+    chart = phrase_simai(simaichart, speedMs)
     return chart
 
 
@@ -106,30 +106,37 @@ E'''
 
 
 class SongPlayer():
-    def __init__(self, songId, display, speed = 5,):
+    def __init__(self, songId, display, speed = 1,):
 
         self.songId = 0 #integer for song id - determines the song to play
         self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
 
-        
+        self.baseTime = 60 #in ticks. 60 ticks in a second. Time taken for note to go from summon ring to judgement line with a speed of one
+        self.baseTimeMs = 1000 #base time in miliseconds
+        speedMultiplerFactor = (speed-1)/3 + 1
+        timeTicks = int(self.baseTime/speedMultiplerFactor)
+        timeMs = int(self.baseTimeMs/speedMultiplerFactor)
         #self.metronometick1 = pygame.mixer.Sound("./assets/sounds/tick1.wav") 
         #self.metronometick2 = pygame.mixer.Sound("./assets/sounds/tick2.wav")
-        self.speed = speed #note speed
+        
         self.display = display 
         monitorWidth, monitorHeight = pygame.display.get_window_size()
         self.radiusConst = monitorHeight * 0.45 #radius of judgement line
-        summonRing = self.radiusConst * 1.7/6.3 #radius of summon ring
+        self.summonRing = self.radiusConst * 1.7/6.3 #radius of summon ring
         self.center = (monitorWidth/2, monitorHeight/2) #center of judgement line
-      
+        print((self.radiusConst - self.summonRing))
+        self.speed = int((self.radiusConst - self.summonRing) / timeTicks)    #this is in pixels per tick.
+        self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
+        print(self.speed)
         self.fps = pygame.time.Clock()
-        self.phrasedchart = getChart(songId)
+        self.phrasedchart = getChart(songId, self.speedMs)
         # print(self.phrasedchart)
 
         # self.buffer = []
         
         self.bar = 0
         self.barfraction = 0
-        self.soundDelay = (self.radiusConst/((math.log(speed) + 1)* self.radiusConst * 0.1/20))
+   
      
         # self.tickCount = 0
         # # print((self.FRAMERATE * 60) / self.bpm)
@@ -250,12 +257,12 @@ class SongPlayer():
         while True:
             # Tick FRAMERATE times per second
             self.fps.tick(FRAMERATE)
-
+            
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
                 for sprites in note.sprite:
-                    print(sprites)
+                   
                     img, pos = sprites.update(self.speed/(FRAMERATE/60))
                         
                         
@@ -264,7 +271,7 @@ class SongPlayer():
                     else:
                         
                         self.display.blit(img, pos)
-                        print(sprites.show)
+                  
             # display notes in between
             self.display.blit(self.chartendimg, self.chartpos)
             
@@ -452,7 +459,7 @@ class SongPlayer():
 #     ticks += 1
 
 
-c = SongPlayer(1, display, 10)
+c = SongPlayer(1, display, 6)
 
 
 #play the whole thing

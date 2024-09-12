@@ -85,10 +85,10 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 #         }
 #     return bar
     
-def phrase_simai(chart):
+def phrase_simai(chart, speed):
     chart = chart.split('\n')
     bpm = 120
-    speed = 5
+    
     phrasedchart = []
     barNumber = 0
     for bar in chart:
@@ -143,7 +143,7 @@ def phrase_simai(chart):
                     
                     note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                     note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber)
+                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
@@ -175,7 +175,7 @@ def phrase_simai(chart):
                 
                 note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                 note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                note.sprite[2]  = sprites.HoldBody(note.buttonNumber)
+                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
                 note.breakNote = isbreak
                 note.doubleNote = isdouble
                 if isdouble:
@@ -225,7 +225,7 @@ class HoldNote(Note):
         self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
         
         self.headSprite = None #head of hold note
-        self.holdDuration = (4/self.divider) * self.duration #duration is in 1/16th beat or whatever the defined unit is
+        self.holdDuration = (4/self.divider) * self.duration * 4 #duration is in 1/16th beat or whatever the defined unit is
         self.tailSprite = None #tail of hold note
         self.elapsedDuration = 0
         self.bodySprite = None
