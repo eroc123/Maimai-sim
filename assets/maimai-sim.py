@@ -158,7 +158,7 @@ class SongPlayer():
             offset += tpb - int(tpb)
             tpb = int(tpb)
             if offset >= 1:
-                tpb -= int(offset)
+                tpb += int(offset)
                 offset -= int(offset)
             
             
