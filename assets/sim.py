@@ -126,7 +126,7 @@ class SongPlayer():
         self.center = (monitorWidth/2, monitorHeight/2) #center of judgement line
         print((self.radiusConst - self.summonRing))
         self.speed = int((self.radiusConst - self.summonRing) / timeTicks)    #this is in pixels per tick.
-        self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
+        self.speedMs = ((self.radiusConst - self.summonRing) / timeMs)
         print(self.speed)
         self.fps = pygame.time.Clock()
         self.phrasedchart = getChart(songId, self.speedMs)
@@ -152,9 +152,9 @@ class SongPlayer():
                 note.elapsedDuration += 1 
                 
                 if int(note.elapsedDuration) == int(note.holdDuration):
-                   
+                    print(note.timeSig)
                     note.sprite[1].locked = False
-                
+                    note.sprite[2].tailFixed = False
                     
         
     def phrase_notes(self, chart):
@@ -169,8 +169,8 @@ class SongPlayer():
             currentbar = chart[bar]
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms
-            tpb = int(1/(currentbar['bpm']/(60*1000))/16)
-            
+            tpb = int((1/(currentbar['bpm']/(60*1000))/16))
+            print(tpb)
             # print(tpb)
             while True:
                 # Go through the current bar
@@ -261,10 +261,12 @@ class SongPlayer():
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
-                for sprites in note.sprite:
-                   
-                    img, pos = sprites.update(self.speed/(FRAMERATE/60))
-                        
+                for spriteIndex, sprites in enumerate(note.sprite):
+                    if spriteIndex != 2:
+                        img, pos = sprites.update(self.speed/(FRAMERATE/60))
+                    else:
+                        sprites.elapsedTicks += 1 
+                        img, pos = sprites.update(self.speed/(FRAMERATE/60))
                         
                     if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
                         pass

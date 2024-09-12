@@ -100,7 +100,7 @@ def phrase_simai(chart, speed):
         
         timesig = bar[bar.index('{')+1:bar.index('}')]
         bar = bar[:bar.index('{')] + bar[bar.index('}')+1:]
-        
+    
         barFraction = 0
         
         notes = bar.split(',')
@@ -125,6 +125,7 @@ def phrase_simai(chart, speed):
                     note.buttonNumber = int(i) - 1
                     note.barNumber = barNumber
                     note.barFraction = barFraction
+                    
                     note.sprite[0] = sprites.TapNote(note.buttonNumber)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
@@ -133,17 +134,17 @@ def phrase_simai(chart, speed):
                     phrasednotes.append(note)
             
                 if 'h' in i:
-                    note = HoldNote()
+                    note = HoldNote(divider = int(i.split(':')[0][-1]), duration = int(i.split(':')[1][0]), timeSig = int(timesig))
 
                     note.buttonNumber = int(i[0]) - 1
                     note.barNumber = barNumber
                     note.barFraction = barFraction
-                    note.divider = int(i.split(':')[0][-1])
-                    note.duration = int(i.split(':')[1][0])
-                    
+                  
+
+                    note.timeSig = timesig
                     note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                     note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
+                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration, bpm, speed)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
@@ -165,7 +166,7 @@ def phrase_simai(chart, speed):
                 phrasednotes.append(note)
            
             if 'h' in i:
-                note = HoldNote()
+                note = HoldNote(divider = int(i.split(':')[0][-1]), duration = int(i.split(':')[1][0]), timeSig = int(timesig))
 
                 note.buttonNumber = int(i[0]) - 1
                 note.barNumber = barNumber
@@ -173,9 +174,10 @@ def phrase_simai(chart, speed):
                 note.divider = int(i.split(':')[0][-1])
                 note.duration = int(i.split(':')[1][0])
                 
+                note.timeSig = timesig
                 note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                 note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
+                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration, bpm, speed)
                 note.breakNote = isbreak
                 note.doubleNote = isdouble
                 if isdouble:
@@ -191,7 +193,7 @@ def phrase_simai(chart, speed):
         
         bar = {
             'bpm': int(bpm), #beats per minute, to get time
-            'timesig': int(timesig), #number e.g. 4. Fraction is always out of 4 (4)quarter notes so 7 would be 7/4 time signature            
+            'timesig': int(timesig), #number e.g. 4. the number is the note divider, e.g. 4 would be a quarter note and 2 is half notes. this means that some parts BPM may be in terms of half notes or quarter notes or whatever other division you have    
             'notes':phrasednotes, #list type
             }
         phrasedchart.append(bar)
@@ -219,15 +221,17 @@ class TapNote(Note):
 
 class HoldNote(Note):
     name = 'HoldNote'
-    def __init__(self):
+    def __init__(self, divider, duration, timeSig):
         super().__init__()
-        self.divider = 1 #1 is whole note, 2 is half note, 4 is quarter note, 8 is eigth note etc.
-        self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
-        
+        self.divider = divider #1 is whole note, 2 is half note, 4 is quarter note, 8 is eigth note etc.
+        self.duration = duration #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
+        self.timeSig = timeSig
+        #time signature for the current bar
         self.headSprite = None #head of hold note
-        self.holdDuration = (4/self.divider) * self.duration * 4 #duration is in 1/16th beat or whatever the defined unit is
+
+        self.holdDuration = ((4/self.divider) * self.duration * 4)  * self.divider /self.timeSig#duration is in 1/16th per-comma length (per-comma length is basically a quarter note unit) or whatever the defined unit is
         self.tailSprite = None #tail of hold note
-        self.elapsedDuration = 0
+        self.elapsedDuration = 0 #in 1/16th of notes
         self.bodySprite = None
         self.sprite = [self.headSprite, self.tailSprite, self.bodySprite]
         self.issegment = False
