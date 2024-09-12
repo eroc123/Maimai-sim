@@ -152,7 +152,7 @@ class SongPlayer():
             currentbar = chart[bar]
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms
-            tpb = int(1/(currentbar['bpm']/(60*1000))/16)
+            tpb = int(4/(currentbar['timesig']*(currentbar['bpm'])/(60*1000))/16)
             
             # print(tpb)
             while True:
