@@ -35,7 +35,7 @@ doubleholdbody = pygame.image.load("assets/images/hold-double-segment.png").conv
 class TapNote:
     def __init__(self, button):
         self.image = singletap
-        
+        self.show = True
         self.button = button
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
@@ -60,6 +60,7 @@ class HoldHead:
     def __init__(self, button):
         self.image = singleholdhead
         self.button = button
+        self.show = True
 
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
@@ -82,7 +83,7 @@ class HoldHead:
 
 class HoldTail:
     def __init__(self, button):
-
+        self.show = True
         self.image = singleholdhead
         self.button = button
         self.x = summonRing * buttonpositions(self.button)[0]
@@ -105,15 +106,18 @@ class HoldTail:
             self.pos[1] += y
         return self.image, self.pos
 class HoldBody:
-    def __init__(self, button):
-
+    def __init__(self, button, holdDuration):
+        self.show = True
         self.locked = False
         self.image = singleholdbody
         self.button = button
+        self.holdDuration = holdDuration #in 1/16 beats
+        msHoldDuration = holdDuration 
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14  , monitorHeight/14))
+        
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]

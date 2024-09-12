@@ -85,10 +85,10 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 #         }
 #     return bar
     
-def phrase_simai(chart):
+def phrase_simai(chart, speed):
     chart = chart.split('\n')
     bpm = 120
-    speed = 5
+    
     phrasedchart = []
     barNumber = 0
     for bar in chart:
@@ -125,11 +125,11 @@ def phrase_simai(chart):
                     note.buttonNumber = int(i) - 1
                     note.barNumber = barNumber
                     note.barFraction = barFraction
-                    note.sprite = sprites.TapNote(note.buttonNumber)
+                    note.sprite[0] = sprites.TapNote(note.buttonNumber)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
-                        note.sprite.double()
+                        note.sprite[0].double()
                     phrasednotes.append(note)
             
                 if 'h' in i:
@@ -141,15 +141,15 @@ def phrase_simai(chart):
                     note.divider = int(i.split(':')[0][-1])
                     note.duration = int(i.split(':')[1][0])
                     
-                    note.headSprite = sprites.HoldHead(note.buttonNumber)
-                    note.tailSprite = sprites.HoldTail(note.buttonNumber)
-                    note.segmentSprite  = sprites.HoldBody(note.buttonNumber)
+                    note.sprite[0] = sprites.HoldHead(note.buttonNumber)
+                    note.sprite[1] = sprites.HoldTail(note.buttonNumber)
+                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
-                        note.headSprite.double()
-                        note.tailSprite.double()
-                        note.segmentSprite.double()
+                        note.sprite[0].double()
+                        note.sprite[1].double()
+                        note.sprite[2].double()
                     phrasednotes.append(note)
                 i = j.split('/')[0]
             if len(i) == 1:
@@ -157,11 +157,11 @@ def phrase_simai(chart):
                 note.buttonNumber = int(i) - 1
                 note.barNumber = barNumber
                 note.barFraction = barFraction
-                note.sprite = sprites.TapNote(note.buttonNumber)
+                note.sprite[0] = sprites.TapNote(note.buttonNumber)
                 note.breakNote = isbreak
                 note.doubleNote = isdouble
                 if isdouble:
-                    note.sprite.double()
+                    note.sprite[0].double()
                 phrasednotes.append(note)
            
             if 'h' in i:
@@ -173,15 +173,15 @@ def phrase_simai(chart):
                 note.divider = int(i.split(':')[0][-1])
                 note.duration = int(i.split(':')[1][0])
                 
-                note.headSprite = sprites.HoldHead(note.buttonNumber)
-                note.tailSprite = sprites.HoldTail(note.buttonNumber)
-                note.segmentSprite  = sprites.HoldBody(note.buttonNumber)
+                note.sprite[0] = sprites.HoldHead(note.buttonNumber)
+                note.sprite[1] = sprites.HoldTail(note.buttonNumber)
+                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
                 note.breakNote = isbreak
                 note.doubleNote = isdouble
                 if isdouble:
-                    note.headSprite.double()
-                    note.tailSprite.double()
-                    note.segmentSprite.double()
+                    note.sprite[0].double()
+                    note.sprite[1].double()
+                    note.sprite[2].double()
                 phrasednotes.append(note)
             
             
@@ -208,7 +208,7 @@ class Note:
         self.barFraction = 0 #depends on time signature, from 0 to (time signature-1). 
         self.breakNote = False #false or true, breaknotes provide extra points
         self.doubleNote = False #if true then graphics is yellow
-        self.sprite = None
+        self.sprite = [None]
 
 class TapNote(Note):
     name = 'TapNote'
@@ -223,21 +223,35 @@ class HoldNote(Note):
         super().__init__()
         self.divider = 1 #1 is whole note, 2 is half note, 4 is quarter note, 8 is eigth note etc.
         self.duration = 1 #how many "notes" of duration. e.g. 1 divider and 2 duration would be 2 whole notes whilst 2 divider 4 duation would be 4 half notes
-        self.headSprite = None #head of hold note
-        self.tailSprite = None #tail of hold note
         
-    def segment(self,button):
+        self.headSprite = None #head of hold note
+        self.holdDuration = (4/self.divider) * self.duration * 4 #duration is in 1/16th beat or whatever the defined unit is
+        self.tailSprite = None #tail of hold note
+
+        self.elapsedDuration = 0
+        self.bodySprite = None
+        self.sprite = [self.headSprite, self.tailSprite, self.bodySprite]
+        self.issegment = False
+    def segment(self):
         # return a new segment sprite
         # issegment used to reduce cpu and memory usage, only return every two checks i.e. every 1/8th beat
-        self.bodySprite = sprites.HoldBody(button)
-        if self.doubleNote:
-            self.bodySprite.double()
-            
-        return self.bodySprite  #segment of hold note
+        self.bodySprite = False
+        
+        if self.issegment:
+            self.sprite[2] = (self.bodySprite)
+            if self.doubleNote:
+                self.bodySprite.double()
+            self.issegment = False
+        else:
+            self.issegment = True
+        
+         #segment of hold note
+
 class SlideNote(HoldNote):
     def __init__(self):
         super().__init__()
         self.pattern = ""
+        self.duration = 0 #duration is in 1/16th beat or whatever the defined unit is
         self.destinationButton = 0 #button where the slide ends
         self.starGraphic = None #is the star graphic 
         self.arrowGraphic = None #is the graphic of the arrow from the star arrival button to destination button
