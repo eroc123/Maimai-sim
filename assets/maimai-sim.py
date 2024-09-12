@@ -139,12 +139,22 @@ class SongPlayer():
         #chartendimg is used to hide the note when it reaches outside
         self.chartendimg = pygame.image.load("assets/images/chart-end.png").convert_alpha()
         self.chartendimg = pygame.transform.scale(self.chartendimg,(monitorHeight,monitorHeight))
-    
+    def updateHolds(self):
+        for note in self.activebuffer:
+            if note.name ==  'HoldNote':
+                note.elapsedDuration += 1 
+                
+                if int(note.elapsedDuration) == int(note.holdDuration):
+                   
+                    note.sprite[1].locked = False
+                
+                    
+        
     def phrase_notes(self, chart):
         clock = pygame.time.Clock()
         currentbarfraction = 0
         bar = 0
-        self.displaybuffer = []
+        self.activebuffer = []
         holdbuffer = []
         # seperate loop that runs every 1/16th of a beat
         # higher accuracy may be needed later on 
@@ -162,39 +172,40 @@ class SongPlayer():
                     if note.barFraction == currentbarfraction:
                         # Different note types
                         if note.name == 'TapNote':
-                            self.displaybuffer.append(note.sprite)
+                            self.activebuffer.append(note)
                         if note.name == 'HoldNote':
-                            self.displaybuffer.append(note.headSprite)
-                            self.displaybuffer.append(note.tailSprite)
+                            self.activebuffer.append(note)
+                            
                             # Fix for note sprite so that they appear consistant to the offical game play
-                            note.headSprite.update(25)
-                            note.tailSprite.locked = False
-                            note.tailSprite.update(-25)
-                            note.tailSprite.locked = True
+                            note.sprite[0].update(25)
+                            note.sprite[1].locked = False
+                            note.sprite[1].update(-25)
+                            note.sprite[1].locked = True
+                            
                             # Keep track of the current hold notes that are being displayed
-                            holdbuffer.append(note)
+                            
 
                 # Look through the hold buffer to find out when to allow the tail note to move
-                for i in holdbuffer:
+                # for i in holdbuffer:
                     
-                    endFraction = (1/i.divider)*i.duration*currentbar['timesig']+i.barFraction
-                    endBar = int(i.barNumber)
-                    while endFraction >= currentbar['timesig']:
-                        endFraction -= currentbar['timesig']
-                        endBar += 1
-                    # print(endFraction,endBar, currentbarfraction, bar)
-                    if endFraction <= currentbarfraction and endBar == bar:
-                        # unlock the tail note so that it can move
-                        i.tailSprite.locked = False
-                        holdbuffer.remove(i)
+                #     endFraction = (1/i.divider)*i.duration*currentbar['timesig']+i.barFraction
+                #     endBar = int(i.barNumber)
+                #     while endFraction >= currentbar['timesig']:
+                #         endFraction -= currentbar['timesig']
+                #         endBar += 1
+                #     # print(endFraction,endBar, currentbarfraction, bar)
+                #     if endFraction <= currentbarfraction and endBar == bar:
+                #         # unlock the tail note so that it can move
+                #         i.tailSprite.locked = False
+                #         holdbuffer.remove(i)
 
-                        # print('removed')
-                    else:
-                        # otherwise display a hold body note
-                        # print(i.buttonNumber)
-                        sprite = i.segment(i.buttonNumber)
-                        if sprite:
-                            self.displaybuffer.append(sprite)
+                #         # print('removed')
+                #     else:
+                #         # otherwise display a hold body note
+                #         # print(i.buttonNumber)
+                #         sprite = i.segment(i.buttonNumber)
+                #         if sprite:
+                #             self.displaybuffer.append(sprite)
                     # # print(int((1/i.divider)*i.duration*currentbar['timesig']))
                 # # print(currentbarfraction, len(holdbuffer))
                         
@@ -206,7 +217,8 @@ class SongPlayer():
 
                 # since each loop cycle is 1/16th of the beat, incrument 1/16
                 currentbarfraction += 1/16
-
+                #update hold notes
+                self.updateHolds()
                 # if end of the bar, incrument bar
                 if int(currentbarfraction) == currentbar['timesig']:
                     bar += 1
@@ -241,11 +253,18 @@ class SongPlayer():
 
             self.display.blit(self.chartimg, self.chartpos)
 
-            for note in self.displaybuffer:
-                img, pos = note.update(self.speed/(FRAMERATE/60))
-                self.display.blit(img, pos)
-                if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                    self.displaybuffer.remove(note)
+            for note in self.activebuffer:
+                for sprites in note.sprite:
+                    print(sprites)
+                    img, pos = sprites.update(self.speed/(FRAMERATE/60))
+                        
+                        
+                    if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
+                        pass
+                    else:
+                        
+                        self.display.blit(img, pos)
+                        print(sprites.show)
             # display notes in between
             self.display.blit(self.chartendimg, self.chartpos)
             
@@ -280,7 +299,7 @@ class SongPlayer():
             #         self.barfraction = 0
             #     if self.bar == 0:
             #         self.display.fill((20,20,20))
-            # # print(self.bar, self.barfraction)
+            # # print(self.bar, self.barf   raction)
             # # if ticks == tickBuffer[0]:
             # #     tickCount += 1
             # #     tickBuffer.remove(ticks)

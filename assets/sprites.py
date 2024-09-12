@@ -35,7 +35,7 @@ doubleholdbody = pygame.image.load("assets/images/hold-double-segment.png").conv
 class TapNote:
     def __init__(self, button):
         self.image = singletap
-        
+        self.show = True
         self.button = button
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
@@ -60,6 +60,7 @@ class HoldHead:
     def __init__(self, button):
         self.image = singleholdhead
         self.button = button
+        self.show = True
 
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
@@ -82,7 +83,7 @@ class HoldHead:
 
 class HoldTail:
     def __init__(self, button):
-
+        self.show = True
         self.image = singleholdhead
         self.button = button
         self.x = summonRing * buttonpositions(self.button)[0]
@@ -106,7 +107,7 @@ class HoldTail:
         return self.image, self.pos
 class HoldBody:
     def __init__(self, button):
-
+        self.show = True
         self.locked = False
         self.image = singleholdbody
         self.button = button
