@@ -227,6 +227,7 @@ class HoldNote(Note):
         self.headSprite = None #head of hold note
         self.holdDuration = (4/self.divider) * self.duration * 4 #duration is in 1/16th beat or whatever the defined unit is
         self.tailSprite = None #tail of hold note
+
         self.elapsedDuration = 0
         self.bodySprite = None
         self.sprite = [self.headSprite, self.tailSprite, self.bodySprite]
@@ -245,6 +246,7 @@ class HoldNote(Note):
             self.issegment = True
         
          #segment of hold note
+
 class SlideNote(HoldNote):
     def __init__(self):
         super().__init__()
