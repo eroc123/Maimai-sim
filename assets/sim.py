@@ -122,7 +122,7 @@ class SongPlayer():
             
             
             # print(tpb)
-            while True:
+            while self.running:
 
                 self.updateHolds()
                 # Go through the current bar
@@ -251,6 +251,7 @@ class SongPlayer():
 
                         self.running = False
                         pygame.mixer.music.stop()
+                        
 
             pygame.display.update()
         return

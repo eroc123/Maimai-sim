@@ -151,6 +151,25 @@ class MainGUI:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    event.x,event.y = event.pos
+                    event.x = event.x/w
+                    event.y = event.y/h
+                    if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} down')
+                            pressedlist.append(touch)
+                    print(event.x, event.y)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    event.x,event.y = event.pos
+                    event.x = event.x/w
+                    event.y = event.y/h
+
+                    if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} up')
+                            pressedlist.remove(touch)
+                    
                 if event.type == pygame.FINGERDOWN:
                     
                     for x,y in buttonpositions:
