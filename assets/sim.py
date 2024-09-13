@@ -163,14 +163,22 @@ class SongPlayer():
         bar = 0
         self.activebuffer = []
         holdbuffer = []
+        offset = 0
         # seperate loop that runs every 1/16th of a beat
         # higher accuracy may be needed later on 
         while True:
             currentbar = chart[bar]
             notes = currentbar['notes']
-            # tpb : time per 1/16th beat in ms
-            tpb = int((1/(currentbar['bpm']/(60*1000))/16))
+            # tpb : time per 1/16th beat in ms1000
+            tpb = (240/currentbar['bpm'])/(currentbar['timesig'])*(1000/16)
             print(tpb)
+            offset += tpb - int(tpb)
+            tpb = int(tpb)
+            if offset >= 1:
+                tpb += int(offset)
+                offset -= int(offset)
+            
+            
             # print(tpb)
             while True:
                 # Go through the current bar
@@ -221,20 +229,23 @@ class SongPlayer():
 
                 # if game is inconsistant, check actualms to compare the actual milisecond time plaused and compare to the tpb
                 actualms = pygame.time.delay(tpb)
+                
 
                 # since each loop cycle is 1/16th of the beat, incrument 1/16
                 currentbarfraction += 1/16
+
                 #update hold notes
                 self.updateHolds()
+
                 # if end of the bar, incrument bar
-                if int(currentbarfraction) == currentbar['timesig']:
+                if int(currentbarfraction) >= currentbar['timesig']:
                     bar += 1
                     currentbarfraction = 0
                     break
 
     def load_music(self):
         # load the music, calculate time offset
-        offset = -0.0
+        offset = 0.600
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
 
@@ -249,7 +260,7 @@ class SongPlayer():
         threading.Thread(target=self.load_music,daemon=True).start()
         
         # here need finetune offset
-        time.sleep(2)
+        time.sleep(1)
 
         #main game engine
         threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon=True).start()
