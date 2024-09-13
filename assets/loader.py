@@ -85,22 +85,29 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 #         }
 #     return bar
     
-def phrase_simai(chart, speed):
+def phrase_simai(chart, diffcuilty):
     chart = chart.split('\n')
     bpm = 120
     
     phrasedchart = []
     barNumber = 0
     for bar in chart:
+        if bar == '':
+            continue
         if 'E' in bar:
             continue
         if '(' in bar and ')' in bar:
             bpm = bar[1:bar.index(')')]
             bar = bar[bar.index(')')+1:]
+
+        try:
+            timesig = bar[bar.index('{')+1:bar.index('}')]
+            bar = bar[:bar.index('{')] + bar[bar.index('}')+1:]
+        except ValueError:
+            print(bar)
+            exit()
         
-        timesig = bar[bar.index('{')+1:bar.index('}')]
-        bar = bar[:bar.index('{')] + bar[bar.index('}')+1:]
-    
+>>>>>>> main
         barFraction = 0
         
         notes = bar.split(',')

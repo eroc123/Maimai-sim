@@ -3,110 +3,46 @@ FRAMERATE = 60
 
 pygame.init()
 pygame.mixer.init()
-display = pygame.display.set_mode((0,0))
-pygame.display.toggle_fullscreen()
-from pygame_widgets.slider import Slider
-from pygame_widgets.textbox import TextBox
-
-slider = Slider(display, 0, 0, 400, 20, min=0, max=999, step=1)
-output = TextBox(display, 475, 200, 50, 50, fontSize=30)    
 
 
+ 
 
-output.disable()
 from loader import phrase_simai
 
 
 
-def getChart(songId, speedMs):
+
+def getChart(path, diffcuilty):
     #return loader.phrase_simai(simaichart)
-    
-    simaichart = '''(119){1},
-{2}4h[4:1],4h[4:1],
-{2}5h[4:1],5h[4:1],
-{2}4h[4:1],4h[4:1],
-{2}5h[4:1],5h[4:1],
-{4}4h[8:1]/5h[8:7],4h[8:1],4h[8:1],4h[8:1],
-{4}4h[8:7]/5h[8:1],5h[8:1],5h[8:1],5h[8:1],
-{4}4h[8:1]/5h[8:7],4h[8:1],4h[8:1],4h[8:1],
-{4}4h[8:1]/5h[8:1],4h[8:1]/5h[8:1],3/6,,
-{8}2h[4:1],,3h[4:1],,4,4,5h[4:1],,
-{8}6h[4:1],,7h[4:1],,1,8,1b,,
-{8}7h[4:1],,6h[4:1],,5,5,4h[4:1],,
-{8}3h[4:1],,2h[4:1],,8,1,8b,,
-{8}1/8h[4:1],,2h[4:1],,6,6,4h[4:1],,
-{8}5h[4:1],,3,3,7h[4:1],,1b,,
-{8}1h[4:1]/8,,7h[4:1],,3,3,5h[4:1],,
-{8}4h[4:1],,6,6,2h[4:1],,8b,,
-{2}1h[4:3]/8h[4:1],7h[4:3],
-{8}2h[4:1],,,,3/6,3/6,3b/6h[2:1],,
-{2}3h[4:3],5h[4:3],
-{8}4h[2:1],,,,5,4,5b,,
-{2}4h[4:1]/5h[4:3],3h[4:3],
-{8}7h[4:1],,,,1/7,1/7,1h[2:1]/7b,,
-{2}8h[4:3],2h[4:3],
-{8}6h[2:1],,,,4,5,4b,,
-{4}4h[2:1],5,5h[2:1],6,
-{4}6h[2:1],7,7h[2:1],8,
-{4}8h[2:1],1,1h[2:1],2,
-{4}2h[2:1],3,3h[2:1],4,
-{4}4h[2:1],8,3h[2:1],7,
-{4}2h[2:1],6,1h[2:1],5,
-{4}8h[2:1],4,7h[2:1],3,
-{4}6h[2:1],2,5-8[32:3],1b,
-{4}4h[8:1]/5h[8:5],4,4h[8:5],5,
-{4}5h[8:5],4,4h[8:5],5b,
-{4}5h[8:3],4h[8:3],5h[8:3],4h[8:3],
-{4}5h[8:3],4h[8:3],5h[4:1],4b,
-{4}4h[8:1]/5h[8:3],3h[8:3],6h[8:3],2h[8:3],
-{4}7h[8:3],1h[8:3],8h[4:1],1b,
-{4}1h[8:3]/8h[8:1],7h[8:3],2h[8:3],6h[8:3],
-{4}3h[8:3],5h[4:1],4b,,
-{8}2h[4:1],,3h[4:1],,1,1,4h[4:1],,
-{8}8h[4:1],,5h[4:1],,7,7,6h[4:1],,
-{8}5h[4:1],,8h[4:1],,4,4,1h[4:1],,
-{8}3h[4:1],,2h[4:1],,1,8,1b,,
-{8}1h[4:1],,7h[4:1],,3,3,5h[4:1],,
-{8}8h[4:1],,2h[4:1],,6,6,4h[4:1],,
-{4}1h[4:1],7h[4:1],8h[4:1],2h[4:1],
-{16}1h[4:1],,,,8h[4:1],,,,2h[8:1],,7h[8:1],,1h[16:1],8h[16:1],1h[16:1],8h[16:1],
-{4}1h[4:1],5h[4:1],2h[4:1],6h[4:1],
-{8}3h[4:1],,7h[4:1],,4,4,8h[4:1],,
-{4}5h[4:1],1h[4:1],6h[4:1],2h[4:1],
-{8}7,7,3h[4:1],,8h[4:1],,4b,,
-{4}1/5h[8:3],2h[8:3],4h[8:3],3h[8:3],
-{8}2h[8:3],,4h[4:1],,1,2b/3b,2b/3b,,
-{4}4/8h[8:3],6h[8:3],7h[8:3],8h[8:3],
-{8}6h[8:3],,1h[4:1],,5,2b/6b,3b/7b,,
-{8}3h[2:1],4,5,,6h[2:1],5,4,,
-{8}2h[2:1],4,5,,7,4b/5b,4b/5b,,
-{8}3h[2:1],1,8,,6h[2:1],8,1,,
-{8}2h[2:1],1,8,,7,1b/8b,1b/8b,,
-{8}1h[2:1],7,6,,2h[2:1],8,7,,
-{8}3h[2:1],1,8,,4,2b/5b,2b/5b,,
-{8}5h[2:1],3,2,,6h[2:1],4,3,,
-{8}7h[2:1],5,4,,8,1b/6b,2b/5b,,
-{4}4h[4:3]/5,3h[8:1],2h[8:1],1,
-{4}4/8h[4:3],5h[8:1],6h[8:1],7,
-{4}1h[4:3]/8,2h[8:1],4h[8:1],6,
-{4}1/8h[4:3],7h[8:1],5h[8:1],3,
-{4}1h[2:1]/8,2h[8:1],8h[2:1],7h[8:1],
-{4}2h[2:1],3h[8:1],7h[2:1],6h[8:1],
-{4}3h[2:1],2h[8:1],6h[2:1],7h[8:1],
-{16}4h[2:1],,,,3h[8:1],,,,5,,4,5,4,,,,
-{1},
-{1},
-{1},
-E'''
-    chart = phrase_simai(simaichart, speedMs)
-    return chart
+    with open(path+'/maidata.txt', 'rb') as f:
+        simaichart = f.read()
+    simaichart = simaichart.decode('utf-8')
+    chartlist = simaichart.split('\n')
+    for line in chartlist:
+        if f'&inote_{diffcuilty}' in line:
+            simaichart = chartlist[chartlist.index(line)+1:]
+            # print(simaichart)
+            for line in simaichart:
+                print(line)
+                if line == '':
+                    simaichart = simaichart[:simaichart.index(line)]
+                    break
+    # print(simaichart)
+    simaichart = '\n'.join(simaichart)
+    print(simaichart)
+    chart = phrase_simai(simaichart, diffcuilty)
+    musicpath = path+'/track.mp3'
+    return chart, musicpath
+
 
 
 
 
 
 class SongPlayer():
-    def __init__(self, songId, display, speed = 1,):
+
+    def __init__(self, path, display, speed, diffcuilty ):
+
 
         self.songId = 0 #integer for song id - determines the song to play
         self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
@@ -126,10 +62,12 @@ class SongPlayer():
         self.center = (monitorWidth/2, monitorHeight/2) #center of judgement line
         print((self.radiusConst - self.summonRing))
         self.speed = int((self.radiusConst - self.summonRing) / timeTicks)    #this is in pixels per tick.
-        self.speedMs = ((self.radiusConst - self.summonRing) / timeMs)
+
+        self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
         print(self.speed)
         self.fps = pygame.time.Clock()
-        self.phrasedchart = getChart(songId, self.speedMs)
+        self.phrasedchart, self.musicpath = getChart(path, diffcuilty)
+
         # print(self.phrasedchart)
 
         # self.buffer = []
@@ -152,9 +90,11 @@ class SongPlayer():
                 note.elapsedDuration += 1 
                 
                 if int(note.elapsedDuration) == int(note.holdDuration):
-                    print(note.timeSig)
+
+                   
                     note.sprite[1].locked = False
-                    note.sprite[2].tailFixed = False
+                
+
                     
         
     def phrase_notes(self, chart):
@@ -166,7 +106,9 @@ class SongPlayer():
         offset = 0
         # seperate loop that runs every 1/16th of a beat
         # higher accuracy may be needed later on 
-        while True:
+
+        while self.running:
+
             currentbar = chart[bar]
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms1000
@@ -181,8 +123,12 @@ class SongPlayer():
             
             # print(tpb)
             while True:
+
+                self.updateHolds()
                 # Go through the current bar
                 for note in notes:
+                    
+
                     # Check if the current 16th beat is the one to display the note for
                     if note.barFraction == currentbarfraction:
                         # Different note types
@@ -235,7 +181,8 @@ class SongPlayer():
                 currentbarfraction += 1/16
 
                 #update hold notes
-                self.updateHolds()
+
+                
 
                 # if end of the bar, incrument bar
                 if int(currentbarfraction) >= currentbar['timesig']:
@@ -245,7 +192,9 @@ class SongPlayer():
 
     def load_music(self):
         # load the music, calculate time offset
-        offset = 0.600
+
+        offset = 0.450
+
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
 
@@ -255,32 +204,38 @@ class SongPlayer():
         
         
 
+        self.running = True
         #load bar to read
-        pygame.mixer.music.load('./assets/sounds/track.mp3')
-        threading.Thread(target=self.load_music,daemon=True).start()
+        pygame.mixer.music.load(self.musicpath)
+        threading.Thread(target=self.load_music).start()
         
         # here need finetune offset
-        time.sleep(1)
+        # time.sleep(1)
 
         #main game engine
-        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon=True).start()
-                
-        while True:
+        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,)).start()
+
+        while self.running:
             # Tick FRAMERATE times per second
-            self.fps.tick(FRAMERATE)
+            FRAMERATE = 1/(self.fps.tick()/1000)
+
             
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
-                for spriteIndex, sprites in enumerate(note.sprite):
-                    if spriteIndex != 2:
-                        img, pos = sprites.update(self.speed/(FRAMERATE/60))
-                    else:
-                        sprites.elapsedTicks += 1 
-                        img, pos = sprites.update(self.speed/(FRAMERATE/60))
+
+                for sprites in note.sprite:
+                   
+                    img, pos = sprites.update(self.speed/(FRAMERATE/60))
+                        
                         
                     if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                        pass
+                        if note.name == "TapNote":
+                            self.activebuffer.remove(note)
+                        # elif note.name == "HoldNote":
+                            # if note.elapsedDuration > note.holdDuration + 50:
+                            #     self.activebuffer.remove(note)
+
                     else:
                         
                         self.display.blit(img, pos)
@@ -293,9 +248,12 @@ class SongPlayer():
                     pygame.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_ESCAPE:
-                        pygame.quit()
+
+                        self.running = False
+                        pygame.mixer.music.stop()
 
             pygame.display.update()
+        return
 
 
 
@@ -472,8 +430,4 @@ class SongPlayer():
 #     ticks += 1
 
 
-c = SongPlayer(1, display, 6)
 
-
-#play the whole thing
-c.play()
