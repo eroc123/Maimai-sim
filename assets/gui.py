@@ -4,8 +4,7 @@ from zipfile import ZipFile, Path
 import io
 import os
 from os import walk
-import pygame_gui
-import pygame_gui.ui_manager
+import touchscreen
 
 def fade_image(image_path):
     display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
@@ -90,8 +89,14 @@ class MainGUI:
         pygame.init()
         self.display = pygame.display.set_mode((0,0))
         pygame.display.toggle_fullscreen()
+        windowcaption = 'Python MaiMai Sim'
+        pygame.display.set_caption(windowcaption)
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
         
+
+        
+        
+
         clock = pygame.time.Clock()
         w,h = display_size
         
@@ -108,9 +113,21 @@ class MainGUI:
         textsurface = font.render('ゲームバラエティ', True, (255, 255, 255))
         
         currentselection = 0
+        os.environ["SDL_MOUSE_TOUCH_EVENTS"] = "0"
+        positions = [
+            (0.38268343236508984, 0.9238795325112867),
+            (0.9238795325112867, 0.38268343236508984),
+            (0.9238795325112867, -0.38268343236508984),
+            (0.38268343236508984, -0.9238795325112867),
+            (-0.38268343236508984, -0.9238795325112867),
+            (-0.9238795325112867, -0.38268343236508984),  
+            (-0.9238795325112867, 0.38268343236508984),
+            (-0.38268343236508984, 0.9238795325112867),]
         while True:
             time_delta = clock.tick(60)/1000.0
-
+            
+            
+            
             self.display.blit(background_surface, (0, 0))
             self.display.blit(self.chartimg, self.chartpos)
             self.display.blit(textsurface, ((0.5*w )- (textsurface.get_rect().centerx), 0.2*h - textsurface.get_rect().centery))
@@ -125,11 +142,9 @@ class MainGUI:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    for song in self.songlist:
-                        if event.ui_element == song.button:
-                            self.play_chart(song.genre, song.id)
-                            break
+                if event.type == pygame.FINGERDOWN:
+                    touch = (event.x, event.y)
+                    print(touch)
             
                 
             pygame.display.update()
