@@ -78,7 +78,7 @@ class MainGUI:
                 zip.extract(song.path, path=f'./tmp')
         path=f'./tmp/'+song.path[:-11]
         # print(path)
-        c = sim.SongPlayer(path,self.display,3,4)
+        c = sim.SongPlayer(path,self.display,6,4)
         c.play()
 
 

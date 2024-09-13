@@ -85,7 +85,7 @@ def phraseHold(speed : float, button : int, beat : int, duration : float, breakn
 #         }
 #     return bar
     
-def phrase_simai(chart, diffcuilty):
+def phrase_simai(chart, diffcuilty, speed):
     chart = chart.split('\n')
     bpm = 120
     
@@ -151,7 +151,7 @@ def phrase_simai(chart, diffcuilty):
                     note.timeSig = timesig
                     note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                     note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
+                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration, speed=speed,bpm=bpm)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
@@ -175,6 +175,7 @@ def phrase_simai(chart, diffcuilty):
             if 'h' in i:
                 note = HoldNote(divider = int(i.split(':')[0][-1]), duration = int(i.split(':')[1][0]), timeSig = int(timesig))
 
+
                 note.buttonNumber = int(i[0]) - 1
                 note.barNumber = barNumber
                 note.barFraction = barFraction
@@ -184,7 +185,7 @@ def phrase_simai(chart, diffcuilty):
                 note.timeSig = timesig
                 note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                 note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
+                note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration, speed, bpm)
                 note.breakNote = isbreak
                 note.doubleNote = isdouble
                 if isdouble:
