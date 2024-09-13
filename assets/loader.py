@@ -151,7 +151,7 @@ def phrase_simai(chart, diffcuilty):
                     note.timeSig = timesig
                     note.sprite[0] = sprites.HoldHead(note.buttonNumber)
                     note.sprite[1] = sprites.HoldTail(note.buttonNumber)
-                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration, bpm, speed)
+                    note.sprite[2]  = sprites.HoldBody(note.buttonNumber, note.holdDuration)
                     note.breakNote = isbreak
                     note.doubleNote = isdouble
                     if isdouble:
