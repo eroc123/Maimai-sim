@@ -106,33 +106,44 @@ class HoldTail:
             self.pos[1] += y
         return self.image, self.pos
 class HoldBody:
-    def __init__(self, button, holdDuration):
+    def __init__(self, button, holdDuration, bpm, speed):
         self.show = True
         self.locked = False
         self.image = singleholdbody
         self.button = button
         self.holdDuration = holdDuration #in 1/16 beats
-        msHoldDuration = holdDuration 
+        #speed is in miliseconds btw. basically pixels per milisecond.
+        self.elapsedTicks = 0
+
+      
+        
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14  , monitorHeight/14))
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14   , monitorHeight/14))
         
+        self.tailFixed = True #if the tail is fixed, extend the body. If not, increase the x and y coordinates.
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
     def double(self):
         self.image = doubleholdbody
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14,  monitorHeight/14  ))
         self.image = pygame.transform.rotate(self.image, self.angles[self.button] * -1)
     def update(self, speed):
         # if not self.locked:
         ############################
         # for hold body i think its better to only have one and update it's length by tranformations
         ############################
-
         x = (speed) * buttonpositions(self.button)[0]
         y = (speed) * buttonpositions(self.button)[1]
-        self.pos[0] += x
-        self.pos[1] += y
+        if self.tailFixed:
+            
+            self.image = pygame.transform.scale(self.image, (self.elapsedTicks * buttonpositions(self.button)[0], self.elapsedTicks * buttonpositions(self.button)[1]))
+            self.pos[0] += (x + buttonpositions(self.button)[0])/2
+            self.pos[1] += (y + buttonpositions(self.button)[1])/2
+        else:
+        
+            self.pos[0] += x
+            self.pos[1] += y
         return self.image, self.pos

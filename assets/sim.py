@@ -4,8 +4,11 @@ FRAMERATE = 60
 pygame.init()
 pygame.mixer.init()
 
+
  
+
 from loader import phrase_simai
+
 
 
 
@@ -35,8 +38,11 @@ def getChart(path, diffcuilty):
 
 
 
+
 class SongPlayer():
+
     def __init__(self, path, display, speed, diffcuilty ):
+
 
         self.songId = 0 #integer for song id - determines the song to play
         self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
@@ -56,10 +62,12 @@ class SongPlayer():
         self.center = (monitorWidth/2, monitorHeight/2) #center of judgement line
         print((self.radiusConst - self.summonRing))
         self.speed = int((self.radiusConst - self.summonRing) / timeTicks)    #this is in pixels per tick.
+
         self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
         print(self.speed)
         self.fps = pygame.time.Clock()
         self.phrasedchart, self.musicpath = getChart(path, diffcuilty)
+
         # print(self.phrasedchart)
 
         # self.buffer = []
@@ -82,9 +90,11 @@ class SongPlayer():
                 note.elapsedDuration += 1 
                 
                 if int(note.elapsedDuration) == int(note.holdDuration):
+
                    
                     note.sprite[1].locked = False
                 
+
                     
         
     def phrase_notes(self, chart):
@@ -96,7 +106,9 @@ class SongPlayer():
         offset = 0
         # seperate loop that runs every 1/16th of a beat
         # higher accuracy may be needed later on 
+
         while self.running:
+
             currentbar = chart[bar]
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms1000
@@ -111,10 +123,12 @@ class SongPlayer():
             
             # print(tpb)
             while True:
+
                 self.updateHolds()
                 # Go through the current bar
                 for note in notes:
                     
+
                     # Check if the current 16th beat is the one to display the note for
                     if note.barFraction == currentbarfraction:
                         # Different note types
@@ -167,6 +181,7 @@ class SongPlayer():
                 currentbarfraction += 1/16
 
                 #update hold notes
+
                 
 
                 # if end of the bar, incrument bar
@@ -177,7 +192,9 @@ class SongPlayer():
 
     def load_music(self):
         # load the music, calculate time offset
+
         offset = 0.450
+
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
 
@@ -186,6 +203,7 @@ class SongPlayer():
         
         
         
+
         self.running = True
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
@@ -200,10 +218,12 @@ class SongPlayer():
         while self.running:
             # Tick FRAMERATE times per second
             FRAMERATE = 1/(self.fps.tick()/1000)
+
             
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
+
                 for sprites in note.sprite:
                    
                     img, pos = sprites.update(self.speed/(FRAMERATE/60))
@@ -215,6 +235,7 @@ class SongPlayer():
                         # elif note.name == "HoldNote":
                             # if note.elapsedDuration > note.holdDuration + 50:
                             #     self.activebuffer.remove(note)
+
                     else:
                         
                         self.display.blit(img, pos)
@@ -227,11 +248,13 @@ class SongPlayer():
                     pygame.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_ESCAPE:
+
                         self.running = False
                         pygame.mixer.music.stop()
 
             pygame.display.update()
         return
+
 
 
         #while True:
@@ -405,4 +428,6 @@ class SongPlayer():
 
 #     pygame.display.update()
 #     ticks += 1
+
+
 
