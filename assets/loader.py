@@ -231,12 +231,7 @@ class HoldNote(Note):
 
         self.holdDuration = ((4/self.divider) * self.duration * 4)  * self.divider /self.timeSig#duration is in 1/16th per-comma length (per-comma length is basically a quarter note unit) or whatever the defined unit is
         self.tailSprite = None #tail of hold note
-<<<<<<< HEAD
         self.elapsedDuration = 0 #in 1/16th of notes
-=======
-
-        self.elapsedDuration = 0
->>>>>>> bbcdfd770c34a6216f9b63b034b94747621b4c3a
         self.bodySprite = None
         self.sprite = [self.headSprite, self.tailSprite, self.bodySprite]
         self.issegment = False
