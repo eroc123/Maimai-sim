@@ -4,7 +4,6 @@ from zipfile import ZipFile, Path
 import io
 import os
 from os import walk
-import touchscreen
 
 def fade_image(image_path):
     display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
@@ -101,7 +100,7 @@ class MainGUI:
         w,h = display_size
         
         y = 0
-        genre = ''
+        genre = 'ゲームバラエティ'
 
         self.chartimg = pygame.image.load("assets/images/chart.png").convert() #circle in the middle - judgement line
         self.chartimg = pygame.transform.scale(self.chartimg,(h,h)) 
@@ -110,21 +109,31 @@ class MainGUI:
         background_surface = pygame.Surface(display_size)
         background_surface.fill(pygame.Color("#626262"))
         font = pygame.font.Font("./assets/fonts/japanese.ttf",20)
-        textsurface = font.render('ゲームバラエティ', True, (255, 255, 255))
+        textsurface = font.render(genre, True, (255, 255, 255))
         
         currentselection = 0
-        os.environ["SDL_MOUSE_TOUCH_EVENTS"] = "0"
-        positions = [
-            (0.38268343236508984, 0.9238795325112867),
-            (0.9238795325112867, 0.38268343236508984),
-            (0.9238795325112867, -0.38268343236508984),
-            (0.38268343236508984, -0.9238795325112867),
-            (-0.38268343236508984, -0.9238795325112867),
-            (-0.9238795325112867, -0.38268343236508984),  
+        
+        buttonpositions = [
+            (-0.38268343236508984, 0.9238795325112867),
             (-0.9238795325112867, 0.38268343236508984),
-            (-0.38268343236508984, 0.9238795325112867),]
+            (-0.9238795325112867, -0.38268343236508984), 
+            (-0.38268343236508984, -0.9238795325112867), 
+            (0.38268343236508984, -0.9238795325112867),
+            (0.9238795325112867, -0.38268343236508984),
+            (0.9238795325112867, 0.38268343236508984),
+            (0.38268343236508984, 0.9238795325112867),
+            
+            
+        ]
+        for x,y in buttonpositions:
+            buttonpositions[buttonpositions.index((x,y))] = ((0.5-(h * 0.45 * x)/w),0.5-(0.45 * y))
+
+        
+        pressedlist = []
+        currentselectionflock = Lock()
+        currentselectionblock = Lock()
         while True:
-            time_delta = clock.tick(60)/1000.0
+            clock.tick(60)
             
             
             
@@ -134,25 +143,65 @@ class MainGUI:
             song = self.songlist[currentselection]
             songsurface = pygame.Surface((0.5*h, 0.5*h))
             
-            songsurface.blit(pygame.transform.scale(song.img, (0.5*h,0.5*h)), (0,0,))
+            songsurface.blit(pygame.transform.scale(song.img, (0.45*h,0.45*h)), (0.025*h,0.025*h))
             text = font.render(song.name, True, (255,255,255))
-            songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.9*songsurface.get_rect().height))
+            songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.95*songsurface.get_rect().height))
             self.display.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.5*h-songsurface.get_rect().centery))
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
                 if event.type == pygame.FINGERDOWN:
-                    touch = (event.x, event.y)
-                    print(touch)
+                    
+                    for x,y in buttonpositions:
+                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} down')
+                            pressedlist.append(touch)
+                if event.type == pygame.FINGERUP:
+                    
+                    for x,y in buttonpositions:
+                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} up')
+                            pressedlist.remove(touch)
+
             
+                
+            if 2 in pressedlist:
+                if currentselectionflock.counter == 0:
+                    currentselection += 1
+                    print(currentselection)
+                currentselectionflock.counter += 1
+            elif currentselectionflock.counter >= 5:
+                currentselectionflock.counter = 0
+
+            if 5 in pressedlist:
+                if currentselectionblock.counter == 0:
+                    currentselection -= 1
+                    print(currentselection)
+                currentselectionblock.counter += 1
+            elif currentselectionblock.counter >= 5:
+                currentselectionblock.counter = 0
+
+            if 3 in pressedlist:
+                if currentselectionblock.counter == 0:
+                    self.play_chart(song.genre, song.id)
+                currentselectionblock.counter += 1
+            elif currentselectionblock.counter >= 5:
+                currentselectionblock.counter = 0
+
+            
+                
                 
             pygame.display.update()
 
         # test code
         # self.play_chart('ゲームバラエティ', '734')
 
-
+class Lock:
+    def __init__(self,):
+        self.counter = 0
                         
 
 class Chart:
