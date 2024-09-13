@@ -110,7 +110,7 @@ class SongPlayer():
             
             
             # print(tpb)
-            while True:
+            while self.running:
                 # Go through the current bar
                 for note in notes:
                     # Check if the current 16th beat is the one to display the note for
@@ -184,7 +184,7 @@ class SongPlayer():
         
         
         
-
+        self.running = True
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
         threading.Thread(target=self.load_music,daemon=True).start()
@@ -195,10 +195,10 @@ class SongPlayer():
         #main game engine
         threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon=True).start()
 
-        while True:
+        while self.running:
             # Tick FRAMERATE times per second
             FRAMERATE = 1/(self.fps.tick()/1000)
-
+            
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
@@ -221,10 +221,10 @@ class SongPlayer():
                     pygame.quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_ESCAPE:
-                        pygame.quit()
+                        self.running = False
 
             pygame.display.update()
-
+        return
 
 
         #while True:
