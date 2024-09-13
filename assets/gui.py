@@ -61,7 +61,7 @@ class MainGUI:
             break
         for file_name in f:
             with ZipFile(self.path+file_name, 'r') as zip: 
-                self.total += len(zip.namelist())/3
+                self.total += len(zip.namelist())/4
         
         for file_name in f:
             
@@ -112,9 +112,10 @@ class MainGUI:
     def animate_in(self, img):
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
         w, h = display_size
-        for i in range (0,255,8): 
+        for i in range (0,255,1): 
             img.set_alpha(i)         
-            time.sleep(0.001)
+            time.sleep(0.002)
+            self.display.fill((255,255,255))
             self.display.blit(img, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
 
             pygame.display.update()
@@ -122,9 +123,10 @@ class MainGUI:
     def animate_out(self, img):
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
         w, h = display_size
-        for i in range (225,0,-8): 
-            img.set_alpha(i)         
-            time.sleep(0.001)
+        for i in range (225,0,-1): 
+            img.set_alpha(i)  
+            self.display.fill((255,255,255))       
+            time.sleep(0.002)
             self.display.blit(img, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
 
             pygame.display.update()
@@ -175,7 +177,8 @@ class MainGUI:
         titlefont = pygame.font.Font("./assets/fonts/japanese.ttf",40)
         titletext = titlefont.render('Python MaiMai Simulator', True, (0,0,0))
         self.animate_in(titletext)
-        self.animate_out(titletext)
+        
+        
         
         w,h = display_size
         
@@ -229,8 +232,12 @@ class MainGUI:
         text = font.render(song.name, True, (255,255,255))
         songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.95*songsurface.get_rect().height))
         background_surface.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.5*h-songsurface.get_rect().centery))
+        time.sleep(0.5)
+        clock.tick(60)
+        self.animate_out(titletext)
         self.animate_in(background_surface)
-
+        pygame.display.update()
+        time.sleep(0.1)
 
         while True:
             clock.tick(60)
