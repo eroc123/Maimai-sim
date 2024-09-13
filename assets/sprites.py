@@ -106,7 +106,7 @@ class HoldTail:
             self.pos[1] += y
         return self.image, self.pos
 class HoldBody:
-    def __init__(self, button, holdDuration, bpm, speed):
+    def __init__(self, button, holdDuration):
         self.show = True
         self.locked = False
         self.image = singleholdbody
