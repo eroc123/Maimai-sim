@@ -26,7 +26,7 @@ def getChart(path, diffcuilty):
                     break
     # print(simaichart)
     simaichart = '\n'.join(simaichart)
-    
+    print(simaichart)
     chart = phrase_simai(simaichart, diffcuilty)
     musicpath = path+'/track.mp3'
     return chart, musicpath
@@ -96,7 +96,7 @@ class SongPlayer():
         offset = 0
         # seperate loop that runs every 1/16th of a beat
         # higher accuracy may be needed later on 
-        while True:
+        while self.running:
             currentbar = chart[bar]
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms1000
@@ -110,9 +110,11 @@ class SongPlayer():
             
             
             # print(tpb)
-            while self.running:
+            while True:
+                self.updateHolds()
                 # Go through the current bar
                 for note in notes:
+                    
                     # Check if the current 16th beat is the one to display the note for
                     if note.barFraction == currentbarfraction:
                         # Different note types
@@ -165,7 +167,7 @@ class SongPlayer():
                 currentbarfraction += 1/16
 
                 #update hold notes
-                self.updateHolds()
+                
 
                 # if end of the bar, incrument bar
                 if int(currentbarfraction) >= currentbar['timesig']:
@@ -187,13 +189,13 @@ class SongPlayer():
         self.running = True
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
-        threading.Thread(target=self.load_music,daemon=True).start()
+        threading.Thread(target=self.load_music).start()
         
         # here need finetune offset
         # time.sleep(1)
 
         #main game engine
-        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon=True).start()
+        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,)).start()
 
         while self.running:
             # Tick FRAMERATE times per second
@@ -208,7 +210,11 @@ class SongPlayer():
                         
                         
                     if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                        pass
+                        if note.name == "TapNote":
+                            self.activebuffer.remove(note)
+                        # elif note.name == "HoldNote":
+                            # if note.elapsedDuration > note.holdDuration + 50:
+                            #     self.activebuffer.remove(note)
                     else:
                         
                         self.display.blit(img, pos)
@@ -222,6 +228,7 @@ class SongPlayer():
                 if event.type == pygame.KEYDOWN:
                     if event.key== pygame.K_ESCAPE:
                         self.running = False
+                        pygame.mixer.music.stop()
 
             pygame.display.update()
         return

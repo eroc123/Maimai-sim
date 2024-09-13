@@ -2,8 +2,10 @@ import pygame
 import time
 from zipfile import ZipFile, Path
 import io
+import os
 from os import walk
 import pygame_gui
+import pygame_gui.ui_manager
 
 def fade_image(image_path):
     display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
@@ -53,7 +55,9 @@ class MainGUI:
                     if 'maidata' in file:
                         metadata = file.split('/')
                         genre = metadata[0]
-                        name = '_'.join(metadata[1].split('_')[1:])
+                        data = zip.read(name = file).decode('utf-8')
+                        data = data.split('\n')
+                        name = data[0].split('=')[1]
                         
                         img = file[:-11] + 'bg.png'
                         
@@ -71,8 +75,9 @@ class MainGUI:
             if song.genre == genre and song.id == id:
                 break
         with ZipFile(self.path+self.genrelist[genre], 'r') as zip: 
-            zip.extract(song.track, path=f'./tmp')
-            zip.extract(song.path, path=f'./tmp')
+            if not os.path.exists(f'./tmp/'+song.path[:-11]):
+                zip.extract(song.track, path=f'./tmp')
+                zip.extract(song.path, path=f'./tmp')
         path=f'./tmp/'+song.path[:-11]
         # print(path)
         c = sim.SongPlayer(path,self.display,3,4)
@@ -81,34 +86,42 @@ class MainGUI:
 
 
     def run(self):
+        pygame.font.init()
         pygame.init()
         self.display = pygame.display.set_mode((0,0))
         pygame.display.toggle_fullscreen()
-        display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
-        manager = pygame_gui.UIManager(display_size)
+        display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
+        
         clock = pygame.time.Clock()
         w,h = display_size
-        scrollFrame = pygame_gui.elements.UIScrollingContainer(pygame.Rect(0,0,w,h),
-                                           allow_scroll_y=False,
-                                           should_grow_automatically=True)
+        
         y = 0
         genre = ''
+
+        self.chartimg = pygame.image.load("assets/images/chart.png").convert() #circle in the middle - judgement line
+        self.chartimg = pygame.transform.scale(self.chartimg,(h,h)) 
+        self.chartpos = self.chartimg.get_rect(center = self.display.get_rect().center) 
+
         background_surface = pygame.Surface(display_size)
-        background_surface.fill(pygame.Color("#000000"))
-        for song in self.songlist:
-            if song.genre == 'ゲームバラエティ':
-                pygame_gui.elements.UITextBox(html_text=song.name,
-                                                    relative_rect=pygame.Rect(20+y, 20, 150, 70),
-                                                    container=scrollFrame)
-                song.button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((20+y+25, 90), (100, 50)),
-                                             text='Play',
-                                             manager=manager,
-                                             container=scrollFrame)
-            y += 200
+        background_surface.fill(pygame.Color("#626262"))
+        font = pygame.font.Font("./assets/fonts/japanese.ttf",20)
+        textsurface = font.render('ゲームバラエティ', True, (255, 255, 255))
+        
+        currentselection = 0
         while True:
             time_delta = clock.tick(60)/1000.0
 
             self.display.blit(background_surface, (0, 0))
+            self.display.blit(self.chartimg, self.chartpos)
+            self.display.blit(textsurface, ((0.5*w )- (textsurface.get_rect().centerx), 0.2*h - textsurface.get_rect().centery))
+            song = self.songlist[currentselection]
+            songsurface = pygame.Surface((0.5*h, 0.5*h))
+            
+            songsurface.blit(pygame.transform.scale(song.img, (0.5*h,0.5*h)), (0,0,))
+            text = font.render(song.name, True, (255,255,255))
+            songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.9*songsurface.get_rect().height))
+            self.display.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.5*h-songsurface.get_rect().centery))
+                
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
@@ -116,10 +129,9 @@ class MainGUI:
                     for song in self.songlist:
                         if event.ui_element == song.button:
                             self.play_chart(song.genre, song.id)
+                            break
             
-                manager.process_events(event)
-            manager.update(time_delta)
-            manager.draw_ui(self.display)
+                
             pygame.display.update()
 
         # test code
@@ -136,6 +148,7 @@ class Chart:
         self.track = track
         self.path = path
         self.id = id
+        self.button = None
 
 
 
