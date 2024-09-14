@@ -358,8 +358,8 @@ class MainGUI:
                     self.play_chart(song.genre, song.id)
                     print('exited song')
                     pressedlist.remove(3)
-                    break
-                
+                    self.animate_in_chart(songsurface)
+
                 self.currentselectionblock.counter += 1
             elif self.currentselectionblock.counter >= 5:
                 self.currentselectionblock.counter = 0

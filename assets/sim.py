@@ -196,7 +196,7 @@ class SongPlayer():
     def load_music(self):
         # load the music, calculate time offset
 
-        offset = 0.450
+        offset = 0.250
 
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
@@ -315,7 +315,7 @@ class SongPlayer():
                         print(x,y, sprite.pos)
                         if sprite.pos[0]/w >= x - 0.05 and sprite.pos[0]/w <= x + 0.05 and sprite.pos[1]/h >= y - 0.05 and sprite.pos[1]/h <= y + 0.05:
                             self.activebuffer.remove(note)
-                            judgementtext = judgement.render('Great', False, (100,255,100))
+                            judgementtext = judgement.render('Perfect', False, (100,255,100))
                             print('Perfect')
                             # judgementtext = self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
 
