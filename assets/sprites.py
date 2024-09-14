@@ -61,7 +61,7 @@ class HoldHead:
         self.image = singleholdhead
         self.button = button
         self.show = True
-
+        
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
@@ -69,7 +69,7 @@ class HoldHead:
         self.image = pygame.transform.rotate(self.image, self.angles[self.button] * -1)
         self.rect = self.image.get_rect()
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
-
+        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
     def double(self):
         self.image = doubleholdhead
         self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
@@ -88,10 +88,12 @@ class HoldTail:
         self.button = button
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
+        
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
         self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
+        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
     def double(self):
         self.image = doubleholdhead
@@ -106,29 +108,34 @@ class HoldTail:
             self.pos[1] += y
         return self.image, self.pos
 class HoldBody:
-    def __init__(self, button, holdDuration):
+    def __init__(self, button, holdDuration, speed, bpm):
         self.show = True
         self.locked = False
         self.image = singleholdbody
         self.button = button
         self.holdDuration = holdDuration #in 1/16 beats
         #speed is in miliseconds btw. basically pixels per milisecond.
-        self.elapsedTicks = 0
-
-      
-        
+        self.elapsedDuration = 0
+        self.speed = speed #speed is in pixels per tick.
+        print("speed is equal to ", self.speed)
+        #surface specifically for hold note segments when being generated
         self.x = summonRing * buttonpositions(self.button)[0]
         self.y = summonRing * buttonpositions(self.button)[1]
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14   , monitorHeight/14))
-        
-        self.tailFixed = True #if the tail is fixed, extend the body. If not, increase the x and y coordinates.
+
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14 , monitorHeight/14))
+        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
+     
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
-        self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
+
+
+        self.segments = [] # <- put all the segments in a single list. format is [segment image, (segment x, segmenty)]
+        self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery] #true position of segment
+        
     def double(self):
         self.image = doubleholdbody
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14,  monitorHeight/14  ))
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
         self.image = pygame.transform.rotate(self.image, self.angles[self.button] * -1)
     def update(self, speed):
         # if not self.locked:
@@ -137,13 +144,18 @@ class HoldBody:
         ############################
         x = (speed) * buttonpositions(self.button)[0]
         y = (speed) * buttonpositions(self.button)[1]
-        if self.tailFixed:
+        if self.holdDuration > self.elapsedDuration:
             
-            self.image = pygame.transform.scale(self.image, (self.elapsedTicks * buttonpositions(self.button)[0], self.elapsedTicks * buttonpositions(self.button)[1]))
-            self.pos[0] += (x + buttonpositions(self.button)[0])/2
-            self.pos[1] += (y + buttonpositions(self.button)[1])/2
-        else:
-        
             self.pos[0] += x
             self.pos[1] += y
-        return self.image, self.pos
+           
+            
+            self.segments.append([self.image, self.pos])
+            return self.segments, self.pos
+        else:
+            for segment in self.segments:
+                segment[1][0] += x
+                segment[1][1] +=y
+            
+            return self.segments, self.pos
+        

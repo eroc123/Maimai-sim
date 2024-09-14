@@ -12,7 +12,7 @@ from loader import phrase_simai
 
 
 
-def getChart(path, diffcuilty):
+def getChart(path, diffcuilty, speed):
     #return loader.phrase_simai(simaichart)
     with open(path+'/maidata.txt', 'rb') as f:
         simaichart = f.read()
@@ -30,7 +30,7 @@ def getChart(path, diffcuilty):
     # print(simaichart)
     simaichart = '\n'.join(simaichart)
     print(simaichart)
-    chart = phrase_simai(simaichart, diffcuilty)
+    chart = phrase_simai(simaichart, diffcuilty, speed)
     musicpath = path+'/track.mp3'
     return chart, musicpath
 
@@ -66,7 +66,7 @@ class SongPlayer():
         self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
         print(self.speed)
         self.fps = pygame.time.Clock()
-        self.phrasedchart, self.musicpath = getChart(path, diffcuilty)
+        self.phrasedchart, self.musicpath = getChart(path, diffcuilty, self.speed)
 
         # print(self.phrasedchart)
 
@@ -88,10 +88,10 @@ class SongPlayer():
         for note in self.activebuffer:
             if note.name ==  'HoldNote':
                 note.elapsedDuration += 1 
-                
+                note.sprite[2].elapsedDuration += 1 
                 if int(note.elapsedDuration) == int(note.holdDuration):
 
-                   
+                    
                     note.sprite[1].locked = False
                 
 
@@ -224,24 +224,43 @@ class SongPlayer():
 
             for note in self.activebuffer:
 
-                for sprites in note.sprite:
+                for spriteindex, sprites in enumerate(note.sprite):
                    
                     img, pos = sprites.update(self.speed/(FRAMERATE/60))
-                        
-                        
-                    if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                        if note.name == "TapNote":
-                            self.activebuffer.remove(note)
-                        # elif note.name == "HoldNote":
-                            # if note.elapsedDuration > note.holdDuration + 50:
-                            #     self.activebuffer.remove(note)
+                    
+                    if note.name == 'TapNote':
 
-                    else:
                         
-                        self.display.blit(img, pos)
+                        if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
+                            
+                            self.activebuffer.remove(note)
+                        else:
+                            self.display.blit(img, pos)
+                    elif note.name == 'HoldNote' and spriteindex == 2:
+                        for segment in img:
+                            if not math.sqrt((pos[0] - self.center[0] + segment[0].get_rect().centerx)**2 + (pos[1] - self.center[1] + segment[0].get_rect().centery)**2) > self.radiusConst * 1.05:
+                            
+                                self.display.blit(segment[0], segment[1])
+                                print(segment[1], "segment coordinates")
+                                print(len(img), "segment length")
+
+                            pass
+                    # elif note.name == "HoldNote":
+                                # if note.elapsedDuration > note.holdDuration + 50:
+                                #     self.activebuffer.remove(note)
+                    elif note.name == 'HoldNote':
+                        if not math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
+                            
+                            self.display.blit(img, pos)
+                        elif note.elapsedDuration > note.holdDuration + 50:
+                            pass
+                            
+                       
                   
-            # display notes in between
-            self.display.blit(self.chartendimg, self.chartpos)
+                        
+                    
+                  
+            
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
