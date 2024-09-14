@@ -294,13 +294,16 @@ class MainGUI:
             if self.currentselection < 0:
                 self.currentselection = 0
             if self.currentselection > self.nextgenreindex-self.genreoffset:
-                self.currentselection -= 1
+                self.currentselection = self.oldselection
             if self.oldselection != self.currentselection:
                 self.animate_out_chart(songsurface)
                 song = self.songlist[self.currentselection]
                 songsurface = pygame.Surface((0.25*h, 0.30*h))
                 songsurface.fill((255,255,255))
+                print(self.currentselection, self.genreoffset)
+
                 song = self.songlist[self.genreoffset+self.currentselection]
+                
                 with ZipFile(self.path+self.genrelist[genre], 'r') as zip: 
                     songimg = pygame.image.load(io.BytesIO(zip.read(song.img)))
                 songsurface.blit(pygame.transform.scale(songimg, (0.225*h,0.225*h)), (0.0125*h,0))
@@ -374,15 +377,17 @@ class MainGUI:
                                     self.nextgenreindex = self.songlist.index(song)
                                     break
                             break
+                    self.currentselection = 0
                 self.buttonlock[1] += 1
             elif self.buttonlock[1] >= 5:
                 self.buttonlock[1] = 0
             if 6 in pressedlist:
                 if self.buttonlock[6] == 0:
                     index = list(self.genrelist).index(genre) - 1
-                    if index > 0:
+                    if index < 0:
                         index = len(self.genrelist)-1
                     genre = list(self.genrelist)[index]
+                    
                     self.textsurface = titlefont.render(genre, True, (0, 0, 0))
                     for song in self.songlist:
                         if song.genre == genre:
@@ -393,7 +398,7 @@ class MainGUI:
                                     self.nextgenreindex = self.songlist.index(song)
                                     break
                             break
-
+                    self.currentselection = 0
                 self.buttonlock[6] += 1
             elif self.buttonlock[6] >= 5:
                 self.buttonlock[6] = 0
