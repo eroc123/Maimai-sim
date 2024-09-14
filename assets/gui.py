@@ -5,6 +5,7 @@ import io
 import os
 import threading
 from os import walk
+import psutil
 
 def fade_image(image_path):
     display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
@@ -108,7 +109,7 @@ class MainGUI:
                 
         path=f'./tmp/'+song.path[:-11]
         # print(path)
-        c = sim.SongPlayer(path,self.display,3,self.diffcuilty)
+        c = sim.SongPlayer(path,self.display,6.5 ,self.diffcuilty)
         c.play()
     def animate_in(self, img):
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
@@ -269,6 +270,7 @@ class MainGUI:
             self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.2*h - self.textsurface.get_rect().centery))
             if self.currentselection < 0:
                 self.currentselection = 0
+            self.nextgenreindex = 0
             if self.currentselection > self.nextgenreindex-self.genreoffset:
                 self.currentselection -= 1
             if self.oldselection != self.currentselection:

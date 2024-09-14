@@ -69,7 +69,7 @@ class HoldHead:
         self.image = pygame.transform.rotate(self.image, self.angles[self.button] * -1)
         self.rect = self.image.get_rect()
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
-        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
+        
     def double(self):
         self.image = doubleholdhead
         self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
@@ -93,7 +93,7 @@ class HoldTail:
         self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
-        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
+        
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery]
     def double(self):
         self.image = doubleholdhead
@@ -123,19 +123,19 @@ class HoldBody:
         self.y = summonRing * buttonpositions(self.button)[1]
         self.angles = [22.5, 67.5, 112.5,157.5, 202.5, 247.5, 292.5, 337.5]
 
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14 , monitorHeight/14))
-        pygame.draw.rect(self.image, (100,100,100), self.image.get_rect(), 2)
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14 , monitorHeight/14 / 3))
+        
      
         self.image = pygame.transform.rotate(self.image, self.angles[self.button - 4] * -1)
         self.rect = self.image.get_rect()
 
-
+        self.frameCounter = 0
         self.segments = [] # <- put all the segments in a single list. format is [segment image, (segment x, segmenty)]
         self.pos = [center[0] + self.x - self.rect.centerx , center[1] + self.y - self.rect.centery] #true position of segment
-        
+        self.frameCounter +=1
     def double(self):
         self.image = doubleholdbody
-        self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14))
+        self.image = pygame.transform.scale(self.image, (monitorHeight/14, monitorHeight/14 / 3))
         self.image = pygame.transform.rotate(self.image, self.angles[self.button] * -1)
     def update(self, speed):
         # if not self.locked:
@@ -143,19 +143,26 @@ class HoldBody:
         # for hold body i think its better to only have one and update it's length by tranformations
         ############################
         x = (speed) * buttonpositions(self.button)[0]
+        
         y = (speed) * buttonpositions(self.button)[1]
-        if self.holdDuration > self.elapsedDuration:
+        framesPerBlit = 1
+         
+
+        if self.holdDuration > self.elapsedDuration and self.frameCounter % framesPerBlit == 0: #only blit new segment once every 6 frames
             
-            self.pos[0] += x
-            self.pos[1] += y
+            self.pos[0] += x * framesPerBlit
+            self.pos[1] += y * framesPerBlit
            
             
-            self.segments.append([self.image, self.pos])
+            self.segments.append([self.image, self.pos.copy()])
+            
             return self.segments, self.pos
-        else:
+        elif self.holdDuration < self.elapsedDuration:
             for segment in self.segments:
                 segment[1][0] += x
                 segment[1][1] +=y
             
+            return self.segments, self.pos
+        else:
             return self.segments, self.pos
         
