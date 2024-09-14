@@ -210,13 +210,13 @@ class SongPlayer():
         self.running = True
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
-        threading.Thread(target=self.load_music).start()
+        threading.Thread(target=self.load_music, daemon=True).start()
         
         # here need finetune offset
         # time.sleep(1)
 
         #main game engine
-        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,)).start()
+        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon = True).start()
         
         buttonpositions = [
             (-0.38268343236508984, 0.9238795325112867),
