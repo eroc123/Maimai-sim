@@ -4,7 +4,10 @@ FRAMERATE = 60
 pygame.init()
 pygame.mixer.init()
 
-
+if __name__ == '__main__':
+    pygame.display.init()
+    display = pygame.display.set_mode((0,0))
+    pygame.display.toggle_fullscreen()
  
 
 from loader import phrase_simai
@@ -23,9 +26,9 @@ def getChart(path, diffcuilty, speed):
             simaichart = chartlist[chartlist.index(line)+1:]
             # print(simaichart)
             for line in simaichart:
-                print(line)
-                if line == '':
-                    simaichart = simaichart[:simaichart.index(line)]
+                print('"',line,'"')
+                if line.replace(' ','') == 'E':
+                    simaichart = simaichart[:simaichart.index(line)+1]
                     break
     # print(simaichart)
     simaichart = '\n'.join(simaichart)
@@ -43,7 +46,7 @@ class SongPlayer():
 
     def __init__(self, path, display, speed, diffcuilty ):
 
-
+        
         self.songId = 0 #integer for song id - determines the song to play
         self.difficultyId = 0 #0 is basic, 5 is remas (if it exists)
 
@@ -214,12 +217,33 @@ class SongPlayer():
 
         #main game engine
         threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,)).start()
+        
+        buttonpositions = [
+            (-0.38268343236508984, 0.9238795325112867),
+            (-0.9238795325112867, 0.38268343236508984),
+            (-0.9238795325112867, -0.38268343236508984), 
+            (-0.38268343236508984, -0.9238795325112867), 
+            (0.38268343236508984, -0.9238795325112867),
+            (0.9238795325112867, -0.38268343236508984),
+            (0.9238795325112867, 0.38268343236508984),
+            (0.38268343236508984, 0.9238795325112867),
+            
+            
+        ]
+        w,h =  pygame.display.Info().current_w , pygame.display.Info().current_h-50
+        for x,y in buttonpositions:
+            buttonpositions[buttonpositions.index((x,y))] = ((0.5-(h * 0.45 * x)/w),0.5-(0.45 * y))
 
+
+        pressedlist = []
+        judgement = pygame.font.Font("./assets/fonts/japanese.ttf",20)
+        judgementtext = pygame.Surface((0,0))
         while self.running:
             # Tick FRAMERATE times per second
             FRAMERATE = 1/(self.fps.tick()/1000)
-
+            # print(FRAMERATE, end = '\r')
             
+            self.display.fill((0,0,0))
             self.display.blit(self.chartimg, self.chartpos)
 
             for note in self.activebuffer:
@@ -231,36 +255,26 @@ class SongPlayer():
                     if note.name == 'TapNote':
 
                         
-                        if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                            
+                    if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.2:
+                        if note.name == "TapNote":
+                            judgementtext = judgement.render('Miss', False, (255,255,255))
                             self.activebuffer.remove(note)
-                        else:
-                            self.display.blit(img, pos)
-                    elif note.name == 'HoldNote' and spriteindex == 2:
-                        for segment in img:
-                            if not math.sqrt((pos[0] - self.center[0] + segment[0].get_rect().centerx)**2 + (pos[1] - self.center[1] + segment[0].get_rect().centery)**2) > self.radiusConst * 1.05:
+                            # self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
+                            print('Miss')
+                            # judgementtext = judgement.render('Miss', False, (255,255,255))
+                            # print('Miss')
                             
-                                self.display.blit(segment[0], segment[1])
-                                print(segment[1], "segment coordinates")
-                                print(len(img), "segment length")
+                                                    # elif note.name == "HoldNote":
+                            # if note.elapsedDuration > note.holdDuration + 50:
+                            #     self.activebuffer.remove(note)
 
-                            pass
-                    # elif note.name == "HoldNote":
-                                # if note.elapsedDuration > note.holdDuration + 50:
-                                #     self.activebuffer.remove(note)
-                    elif note.name == 'HoldNote':
-                        if not math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.05:
-                            
-                            self.display.blit(img, pos)
-                        elif note.elapsedDuration > note.holdDuration + 50:
-                            pass
-                            
-                       
-                  
+                    else:
                         
-                    
-                  
+                        self.display.blit(img, pos)
+                
             
+            # display notes in between
+            self.display.blit(self.chartendimg, self.chartpos)
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -270,7 +284,60 @@ class SongPlayer():
 
                         self.running = False
                         pygame.mixer.music.stop()
+                        pygame.mixer.music.unload()
+
+                if event.type == pygame.FINGERDOWN:
                         
+                    for x,y in buttonpositions:
+                        # print(x,y)
+                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} down')
+                            pressedlist.append(touch)
+                if event.type == pygame.FINGERUP:
+                    
+                    for x,y in buttonpositions:
+                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                            touch = buttonpositions.index((x,y))
+                            # print(f'Button {touch} up')
+                            try:
+                                pressedlist.remove(touch)
+                            except ValueError:
+                                # somehow we missed a touch down event
+                                pass
+            
+
+            for note in self.activebuffer:
+                if note.buttonNumber in pressedlist:
+                    sprite = note.sprite[0]
+                    x, y = buttonpositions[note.buttonNumber]
+                    
+                    self.display.blit(judgement.render(f'{note.buttonNumber}, {pressedlist}', False, (255,255,255) ), (100, 100))
+                    if note.name == 'TapNote' and sprite.pos[0]/w >= x - 0.1 and sprite.pos[0]/w <= x + 0.1 and sprite.pos[1]/h >= y - 0.1 and sprite.pos[1]/h <= y + 0.1:
+                        print(x,y, sprite.pos)
+                        if sprite.pos[0]/w >= x - 0.05 and sprite.pos[0]/w <= x + 0.05 and sprite.pos[1]/h >= y - 0.05 and sprite.pos[1]/h <= y + 0.05:
+                            self.activebuffer.remove(note)
+                            judgementtext = judgement.render('Great', False, (100,255,100))
+                            print('Perfect')
+                            # judgementtext = self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
+
+                        elif sprite.pos[0]/w >= x - 0.08 and sprite.pos[0]/w <= x + 0.08 and sprite.pos[1]/h >= y - 0.08 and sprite.pos[1]/h <= y + 0.08:
+                            self.activebuffer.remove(note)
+                            judgementtext = judgement.render('Great', False, (255,255,100))
+                            print('Great')
+                            # judgementtext = self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
+                        else:
+                            self.activebuffer.remove(note)
+                            judgementtext = judgement.render('Bad', False, (255,100,100))
+                            print('Bad')
+                            # self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
+
+                        
+
+                        
+                    
+                        
+            self.display.blit(judgementtext, (w/2 - judgementtext.get_rect().centerx, h/2 -judgementtext.get_rect().centery))
 
             pygame.display.update()
         return
@@ -449,5 +516,9 @@ class SongPlayer():
 #     pygame.display.update()
 #     ticks += 1
 
-
+if __name__ == '__main__':
+    path = './tmp/ゲームバラエティ/1051_DESTR0YER_DX'
+    c = SongPlayer(path,display,3,1)
+    
+    c.play()
 

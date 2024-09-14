@@ -129,7 +129,11 @@ def phrase_simai(chart, diffcuilty, speed):
                 i = j.split('/')[1]
                 if len(i) == 1:
                     note = TapNote()
-                    note.buttonNumber = int(i) - 1
+                    try:
+
+                        note.buttonNumber = int(i) - 1
+                    except:
+                        continue
                     note.barNumber = barNumber
                     note.barFraction = barFraction
                     
@@ -143,7 +147,10 @@ def phrase_simai(chart, diffcuilty, speed):
                 if 'h' in i:
                     note = HoldNote(divider = int(i.split(':')[0][-1]), duration = int(i.split(':')[1][0]), timeSig = int(timesig))
 
-                    note.buttonNumber = int(i[0]) - 1
+                    try:
+                        note.buttonNumber = int(i[0]) - 1
+                    except:
+                        continue
                     note.barNumber = barNumber
                     note.barFraction = barFraction
                   
@@ -162,7 +169,10 @@ def phrase_simai(chart, diffcuilty, speed):
                 i = j.split('/')[0]
             if len(i) == 1:
                 note = TapNote()
-                note.buttonNumber = int(i) - 1
+                try:
+                    note.buttonNumber = int(i) - 1
+                except:
+                    continue
                 note.barNumber = barNumber
                 note.barFraction = barFraction
                 note.sprite[0] = sprites.TapNote(note.buttonNumber)
@@ -174,9 +184,10 @@ def phrase_simai(chart, diffcuilty, speed):
            
             if 'h' in i:
                 note = HoldNote(divider = int(i.split(':')[0][-1]), duration = int(i.split(':')[1][0]), timeSig = int(timesig))
-
-
-                note.buttonNumber = int(i[0]) - 1
+                try:
+                    note.buttonNumber = int(i[0]) - 1
+                except:
+                    continue
                 note.barNumber = barNumber
                 note.barFraction = barFraction
                 note.divider = int(i.split(':')[0][-1])
