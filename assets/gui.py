@@ -5,7 +5,12 @@ import io
 import os
 import threading
 from os import walk
-import psutil
+import gc
+import logging
+
+# class GenreSelectionGUI:
+#     def __init__(self,):
+#         pass
 
 def fade_image(image_path):
     display_size = pygame.display.Info().current_w , pygame.display.Info().current_h - 50
@@ -135,40 +140,60 @@ class MainGUI:
     def animate_in_chart(self, img):
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
         w, h = display_size
+        diffcuiltynames  = [
+            '','',
+            'Basic',
+            'Advancced',
+            'Expert',
+            'Master',
+        ]
+        font = pygame.font.Font("./assets/fonts/japanese.ttf",15)
+        diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], False, (0,0,0))
         for i in range (0,255,8): 
             img.set_alpha(i)         
             time.sleep(0.001)
             
             background_surface = pygame.Surface(display_size)
-            background_surface.fill(pygame.Color("#626262"))
+            background_surface.fill(pygame.Color("#000000"))
             background_surface2 = pygame.Surface((img.get_rect().width, img.get_rect().height))
             background_surface2.fill(pygame.Color('#FFFFFF'))
             
             self.display.blit(background_surface, (0, 0))
             self.display.blit(self.chartimg, self.chartpos)
-            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.2*h - self.textsurface.get_rect().centery))
-
+            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.3*h - self.textsurface.get_rect().centery))
+            
+            self.display.blit(diffcuilty_surface, (w/2 - diffcuilty_surface.get_rect().centerx,100))
             self.display.blit(background_surface2, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
-            self.display.blit(img, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
+            self.display.blit(img, (0.5*w - img.get_rect().centerx,0.55*h-img.get_rect().centery))
 
             pygame.display.update()
         self.oldselection = self.currentselection
     def animate_out_chart(self,img):
+        diffcuiltynames  = [
+            '','',
+            'Basic',
+            'Advancced',
+            'Expert',
+            'Master',
+        ]
+        font = pygame.font.Font("./assets/fonts/japanese.ttf",15)
+        diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], False, (0,0,0))
         for i in range (255, 0, -8): 
             img.set_alpha(i)         
             time.sleep(0.001)
             display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
             w, h = display_size
             background_surface = pygame.Surface(display_size)
-            background_surface.fill(pygame.Color("#626262"))
+            background_surface.fill(pygame.Color("#000000"))
             background_surface2 = pygame.Surface((img.get_rect().width, img.get_rect().height))
             background_surface2.fill(pygame.Color('#FFFFFF'))
             self.display.blit(background_surface, (0, 0))
             self.display.blit(self.chartimg, self.chartpos)
-            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.2*h - self.textsurface.get_rect().centery))
-
+            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.3*h - self.textsurface.get_rect().centery))
+            
+            self.display.blit(diffcuilty_surface, (w/2 - diffcuilty_surface.get_rect().centerx,100))
             self.display.blit(background_surface2, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
-            self.display.blit(img, (0.5*w - img.get_rect().centerx,0.5*h-img.get_rect().centery))
+            self.display.blit(img, (0.5*w - img.get_rect().centerx,0.55*h-img.get_rect().centery))
             pygame.display.update()
     def run(self):
         self.diffcuilty = 2
@@ -185,9 +210,10 @@ class MainGUI:
         
 
         clock = pygame.time.Clock()
-        font = pygame.font.Font("./assets/fonts/japanese.ttf",20)
-        titlefont = pygame.font.Font("./assets/fonts/japanese.ttf",40)
-        titletext = titlefont.render('Python MaiMai Simulator', True, (0,0,0))
+        font = pygame.font.Font("./assets/fonts/japanese.ttf",15)
+        logofont = pygame.font.Font("./assets/fonts/japanese.ttf",40)
+        titlefont = pygame.font.Font("./assets/fonts/japanese.ttf",30)
+        titletext = logofont.render('Python MaiMai Simulator', True, (0,0,0))
         self.animate_in(titletext)
         
         
@@ -202,10 +228,10 @@ class MainGUI:
         self.chartpos = self.chartimg.get_rect(center = self.display.get_rect().center) 
 
         background_surface = pygame.Surface(display_size)
-        background_surface.fill(pygame.Color("#626262"))
+        background_surface.fill(pygame.Color("#000000"))
         
         
-        self.textsurface = font.render(genre, True, (0, 0, 0))
+        self.textsurface = titlefont.render(genre, True, (0, 0, 0))
         
         self.currentselection = 0
         
@@ -224,15 +250,14 @@ class MainGUI:
         for x,y in buttonpositions:
             buttonpositions[buttonpositions.index((x,y))] = ((0.5-(h * 0.45 * x)/w),0.5-(0.45 * y))
 
-        print(genre)
+        # print(genre)
         pressedlist = []
 
-        self.currentselectionflock = Lock()
-        self.currentselectionblock = Lock()
+        self.buttonlock = [0,0,0,0,0,0,0,0]
         self.oldselection = 0
         # background_surface.blit(background_surface, (0, 0))
         background_surface.blit(self.chartimg, self.chartpos)
-        background_surface.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.2*h - self.textsurface.get_rect().centery))
+        background_surface.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.3*h - self.textsurface.get_rect().centery))
         for song in self.songlist:
             if song.genre == genre:
                 # print(self.path+self.genrelist[genre])
@@ -248,14 +273,15 @@ class MainGUI:
             songimg = pygame.image.load(io.BytesIO(zip.read(song.img)))
 
         
-        songsurface = pygame.Surface((0.5*h, 0.5*h))
+        songsurface = pygame.Surface((0.25*h, 0.30*h))
         songsurface.fill((255,255,255))
-        songsurface.blit(pygame.transform.scale(songimg, (0.45*h,0.45*h)), (0.025*h,0))
+        songsurface.blit(pygame.transform.scale(songimg, (0.225*h,0.225*h)), (0.0125*h,0))
         text = font.render(song.name, True, (0,0,0))
-        songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.9*songsurface.get_rect().height))
-        background_surface.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.5*h-songsurface.get_rect().centery))
+        songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.85*songsurface.get_rect().height))
+        background_surface.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.55*h-songsurface.get_rect().centery))
         time.sleep(0.5)
-        clock.tick(60)
+        gc.collect()
+        gc.enable()
         self.animate_out(titletext)
         self.animate_in(background_surface)
         clock.tick(60)
@@ -267,58 +293,63 @@ class MainGUI:
             
             self.display.blit(background_surface, (0, 0))
             self.display.blit(self.chartimg, self.chartpos)
-            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.2*h - self.textsurface.get_rect().centery))
+            self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.30*h - self.textsurface.get_rect().centery))
             if self.currentselection < 0:
                 self.currentselection = 0
             self.nextgenreindex = 0
             if self.currentselection > self.nextgenreindex-self.genreoffset:
-                self.currentselection -= 1
+                self.currentselection = self.oldselection
             if self.oldselection != self.currentselection:
                 self.animate_out_chart(songsurface)
                 song = self.songlist[self.currentselection]
-                songsurface = pygame.Surface((0.5*h, 0.5*h))
+                songsurface = pygame.Surface((0.25*h, 0.30*h))
                 songsurface.fill((255,255,255))
+                # print(self.currentselection, self.genreoffset)
+
                 song = self.songlist[self.genreoffset+self.currentselection]
+                
                 with ZipFile(self.path+self.genrelist[genre], 'r') as zip: 
                     songimg = pygame.image.load(io.BytesIO(zip.read(song.img)))
-                songsurface.blit(pygame.transform.scale(songimg, (0.45*h,0.45*h)), (0.025*h,0))
+                songsurface.blit(pygame.transform.scale(songimg, (0.225*h,0.225*h)), (0.0125*h,0))
                 text = font.render(song.name, True, (0,0,0))
-                songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.9*songsurface.get_rect().height))
+                songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.85*songsurface.get_rect().height))
                 self.animate_in_chart(songsurface)
             else:
                 song = self.songlist[self.currentselection]
-                songsurface = pygame.Surface((0.5*h, 0.5*h))
+                songsurface = pygame.Surface((0.25*h, 0.30*h))
                 songsurface.fill((255,255,255))
                 song = self.songlist[self.genreoffset+self.currentselection]
                 with ZipFile(self.path+self.genrelist[genre], 'r') as zip: 
                     songimg = pygame.image.load(io.BytesIO(zip.read(song.img)))
-                songsurface.blit(pygame.transform.scale(songimg, (0.45*h,0.45*h)), (0.025*h,0))
+                songsurface.blit(pygame.transform.scale(songimg, (0.225*h,0.225*h)), (0.0125*h,0))
                 text = font.render(song.name, True, (0,0,0))
-                songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.9*songsurface.get_rect().height))
-                self.display.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.5*h-songsurface.get_rect().centery))
+                songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.85*songsurface.get_rect().height))
+                self.display.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.55*h-songsurface.get_rect().centery))
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    event.x,event.y = event.pos
-                    event.x = event.x/w
-                    event.y = event.y/h
-                    for x,y in buttonpositions:
-                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
-                            touch = buttonpositions.index((x,y))
-                            # print(f'Button {touch} down')
-                            pressedlist.append(touch)
-                    print(event.x, event.y)
+                    if not event.touch:
+                        event.x,event.y = event.pos
+                        event.x = event.x/w
+                        event.y = event.y/h
+                        for x,y in buttonpositions:
+                            if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                                touch = buttonpositions.index((x,y))
+                                # print(f'Button {touch} down')
+                                pressedlist.append(touch)
+                    # print(event.x, event.y)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    event.x,event.y = event.pos
-                    event.x = event.x/w
-                    event.y = event.y/h
-                    for x,y in buttonpositions:
-                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
-                            touch = buttonpositions.index((x,y))
-                            # print(f'Button {touch} up')
-                            pressedlist.remove(touch)
+                    if not event.touch:
+                        event.x,event.y = event.pos
+                        event.x = event.x/w
+                        event.y = event.y/h
+                        for x,y in buttonpositions:
+                            if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                                touch = buttonpositions.index((x,y))
+                                # print(f'Button {touch} up')
+                                pressedlist.remove(touch)
                     
                 if event.type == pygame.FINGERDOWN:
                     
@@ -335,58 +366,107 @@ class MainGUI:
                             # print(f'Button {touch} up')
                             pressedlist.remove(touch)
 
-            
+            if 1 in pressedlist:
+                if self.buttonlock[1] == 0:
+                    index = list(self.genrelist).index(genre) + 1
+                    if index == len(self.genrelist):
+                        index = 0
+                    
+                    genre = list(self.genrelist)[index]
+                    self.textsurface = titlefont.render(genre, True, (0, 0, 0))
+                    for song in self.songlist:
+                        if song.genre == genre:
+                            # print(self.path+self.genrelist[genre])
+                            self.genreoffset = self.songlist.index(song)
+                            for song in self.songlist[self.genreoffset+1:]:
+                                if song.genre != genre:
+                                    self.nextgenreindex = self.songlist.index(song)
+                                    break
+                            break
+                    self.currentselection = 0
+                self.buttonlock[1] += 1
+            elif self.buttonlock[1] >= 1:
+                self.buttonlock[1] = 0
+            if 6 in pressedlist:
+                if self.buttonlock[6] == 0:
+                    index = list(self.genrelist).index(genre) - 1
+                    if index < 0:
+                        index = len(self.genrelist)-1
+                    genre = list(self.genrelist)[index]
+                    
+                    self.textsurface = titlefont.render(genre, True, (0, 0, 0))
+                    for song in self.songlist:
+                        if song.genre == genre:
+                            # print(self.path+self.genrelist[genre])
+                            self.genreoffset = self.songlist.index(song)
+                            for song in self.songlist[self.genreoffset+1:]:
+                                if song.genre != genre:
+                                    self.nextgenreindex = self.songlist.index(song)
+                                    break
+                            break
+                    self.currentselection = 0
+                self.buttonlock[6] += 1
+            elif self.buttonlock[6] >= 1:
+                self.buttonlock[6] = 0
                 
             if 2 in pressedlist:
-                if self.currentselectionflock.counter == 0:
+                if self.buttonlock[2] == 0:
                     self.currentselection += 1
-                    print(self.currentselection)
-                self.currentselectionflock.counter += 1
-            elif self.currentselectionflock.counter >= 5:
-                self.currentselectionflock.counter = 0
+                    # print(self.currentselection)
+                self.buttonlock[2] += 1
+            elif self.buttonlock[2] >= 1:
+                self.buttonlock[2] = 0
 
             if 5 in pressedlist:
-                if self.currentselectionblock.counter == 0:
+                if self.buttonlock[5] == 0:
                     self.currentselection -= 1
-                    print(self.currentselection)
-                self.currentselectionblock.counter += 1
-            elif self.currentselectionblock.counter >= 5:
-                self.currentselectionblock.counter = 0
-
+                    # print(self.currentselection)
+                self.buttonlock[5] += 1
+            elif self.buttonlock[5] >= 1:
+                self.buttonlock[5] = 0
+            
             if 3 in pressedlist:
-                if self.currentselectionblock.counter == 0:
+                if self.buttonlock[3] == 0:
                     clock.tick(5)
                     self.animate_out_chart(songsurface)
                     self.play_chart(song.genre, song.id)
                     print('exited song')
                     pressedlist.remove(3)
-                    break
-                
-                self.currentselectionblock.counter += 1
-            elif self.currentselectionblock.counter >= 5:
-                self.currentselectionblock.counter = 0
+                    self.animate_in_chart(songsurface)
+
+                self.buttonlock[3] += 1
+            elif self.buttonlock[3] >= 1:
+                self.buttonlock[3] = 0
+
+            if 4 in pressedlist:
+                if self.buttonlock[4] == 0:
+                    pass
+
+                self.buttonlock[4] += 1
+            elif self.buttonlock[4] >= 1:
+                self.buttonlock[4] = 0
 
             if 0 in pressedlist:
-                if self.currentselectionblock.counter == 0:
+                if self.buttonlock[0] == 0:
                     self.diffcuilty += 1
                     if self.diffcuilty >= len(diffcuiltynames)-1:
                         self.diffcuilty = len(diffcuiltynames)-1
-                self.currentselectionblock.counter += 1
-            elif self.currentselectionblock.counter >= 5:
-                self.currentselectionblock.counter = 0
+                self.buttonlock[0] += 1
+            elif self.buttonlock[0] >= 1:
+                self.buttonlock[0] = 0
 
             if 7 in pressedlist:
-                if self.currentselectionblock.counter == 0:
+                if self.buttonlock[7] == 0:
                     self.diffcuilty -= 1
                     if self.diffcuilty <= 0:
                         self.diffcuilty = 0
-                self.currentselectionblock.counter += 1
-            elif self.currentselectionblock.counter >= 5:
-                self.currentselectionblock.counter = 0
-            diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], False, (0,0,0))
+                self.buttonlock[7] += 1
+            elif self.buttonlock[7] >= 1:
+                self.buttonlock[7] = 0
+            diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], True, (0,0,0))
             self.display.blit(diffcuilty_surface, (w/2 - diffcuilty_surface.get_rect().centerx,100))
 
-                
+            
                 
             pygame.display.update()
             clock.tick(60)
@@ -394,9 +474,9 @@ class MainGUI:
         # test code
         # self.play_chart('ゲームバラエティ', '734')
 
-class Lock:
-    def __init__(self,):
-        self.counter = 0
+class Lock(list):
+    pass
+
                         
 
 class Chart:
@@ -412,5 +492,6 @@ class Chart:
 
 
 c = MainGUI()
+gc.disable()
 c.read_charts()
 c.run()

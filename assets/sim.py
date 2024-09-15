@@ -123,7 +123,7 @@ class SongPlayer():
             notes = currentbar['notes']
             # tpb : time per 1/16th beat in ms1000
             tpb = (240/currentbar['bpm'])/(currentbar['timesig'])*(1000/16)
-            print(tpb)
+            # print(tpb)
             offset += tpb - int(tpb)
             tpb = int(tpb)
             if offset >= 1:
@@ -203,7 +203,7 @@ class SongPlayer():
     def load_music(self):
         # load the music, calculate time offset
 
-        offset = 0.450
+        offset = 0.250
 
         time.sleep((300/self.radiusConst)+offset)
         pygame.mixer.music.play()
@@ -217,13 +217,14 @@ class SongPlayer():
         self.running = True
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
-        threading.Thread(target=self.load_music).start()
+        threading.Thread(target=self.load_music, daemon=True).start()
+        
         
         # here need finetune offset
         # time.sleep(1)
 
         #main game engine
-        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,)).start()
+        threading.Thread(target=self.phrase_notes, args=(self.phrasedchart,), daemon = True).start()
         
         buttonpositions = [
             (-0.38268343236508984, 0.9238795325112867),
@@ -249,6 +250,7 @@ class SongPlayer():
             # Tick FRAMERATE times per second
             FRAMERATE = 1/(self.fps.tick()/1000)
             # print(FRAMERATE, end = '\r')
+            
             
             self.display.fill((0,0,0))
             self.display.blit(self.chartimg, self.chartpos)
@@ -277,7 +279,7 @@ class SongPlayer():
                             #judgementtext = judgement.render('Miss', False, (255,255,255))
                             self.activebuffer.remove(note)
                             # self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
-                            #print('Miss')
+                            # print('Miss')
                             # judgementtext = judgement.render('Miss', False, (255,255,255))
                             # print('Miss')
                             
@@ -330,22 +332,22 @@ class SongPlayer():
                     
                     self.display.blit(judgement.render(f'{note.buttonNumber}, {pressedlist}', False, (255,255,255) ), (100, 100))
                     if note.name == 'TapNote' and sprite.pos[0]/w >= x - 0.1 and sprite.pos[0]/w <= x + 0.1 and sprite.pos[1]/h >= y - 0.1 and sprite.pos[1]/h <= y + 0.1:
-                        print(x,y, sprite.pos)
+                        # print(x,y, sprite.pos)
                         if sprite.pos[0]/w >= x - 0.05 and sprite.pos[0]/w <= x + 0.05 and sprite.pos[1]/h >= y - 0.05 and sprite.pos[1]/h <= y + 0.05:
                             self.activebuffer.remove(note)
-                            judgementtext = judgement.render('Great', False, (100,255,100))
-                            print('Perfect')
+                            judgementtext = judgement.render('Perfect', False, (100,255,100))
+                            # print('Perfect')
                             # judgementtext = self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
 
                         elif sprite.pos[0]/w >= x - 0.08 and sprite.pos[0]/w <= x + 0.08 and sprite.pos[1]/h >= y - 0.08 and sprite.pos[1]/h <= y + 0.08:
                             self.activebuffer.remove(note)
                             judgementtext = judgement.render('Great', False, (255,255,100))
-                            print('Great')
+                            # print('Great')
                             # judgementtext = self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
                         else:
                             self.activebuffer.remove(note)
                             judgementtext = judgement.render('Bad', False, (255,100,100))
-                            print('Bad')
+                            # print('Bad')
                             # self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
 
                         
@@ -354,7 +356,7 @@ class SongPlayer():
                     
                         
             self.display.blit(judgementtext, (w/2 - judgementtext.get_rect().centerx, h/2 -judgementtext.get_rect().centery))
-
+            self.display.blit(judgement.render(str(int(FRAMERATE)),True, (255,255,255) ), (0,0))
             pygame.display.update()
         return
 
