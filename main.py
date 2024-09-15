@@ -62,49 +62,13 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
-def get_platform_info():
-    uname = platform.uname()
-    logging.info(f"System: {uname.system}")
-    logging.info(f"Node Name: {uname.node}")
-    logging.info(f"Release: {uname.release}")
-    logging.info(f"Version: {uname.version}")
-    logging.info(f"Machine: {uname.machine}")
-    logging.info(f"Processor: {uname.processor}")
 
-    logging.info("="*40+ "CPU Info"+ "="*40)
-    # number of cores
-    logging.info("Physical cores:"+ str(psutil.cpu_count(logical=False)))
-    logging.info("Total cores:"+ str(psutil.cpu_count(logical=True)))
-    # CPU frequencies
-    cpufreq = psutil.cpu_freq()
-    logging.info(f"Max Frequency: {cpufreq.max:.2f}Mhz")
-    logging.info(f"Min Frequency: {cpufreq.min:.2f}Mhz")
-    logging.info(f"Current Frequency: {cpufreq.current:.2f}Mhz")
-    # CPU usage
-    logging.info("CPU Usage Per Core:")
-    for i, percentage in enumerate(psutil.cpu_percent(percpu=True, interval=1)):
-        logging.info(f"Core {i}: {percentage}%")
-    logging.info(f"Total CPU Usage: {psutil.cpu_percent()}%")
-    logging.info("="*40+ "Memory Information"+ "="*40)
-    # get the memory details
-    svmem = psutil.virtual_memory()
-    logging.info(f"Total: {get_size(svmem.total)}")
-    logging.info(f"Available: {get_size(svmem.available)}")
-    logging.info(f"Used: {get_size(svmem.used)}")
-    logging.info(f"Percentage: {svmem.percent}%")
-    logging.info("="*20+ "SWAP"+ "="*20)
-    # get the swap memory details (if exists)
-    swap = psutil.swap_memory()
-    logging.info(f"Total: {get_size(swap.total)}")
-    logging.info(f"Free: {get_size(swap.free)}")
-    logging.info(f"Used: {get_size(swap.used)}")
-    logging.info(f"Percentage: {swap.percent}%")
 
 if __name__ == '__main__':
     logging.debug('Starting new Run')
-    get_platform_info()
+    # get_platform_info()
     threading.Thread(target = debug, daemon=True).start()
-    os.system(f'{PYTHON} ./assets/maimai-sim.py') #blocking process
+    os.system(f'{PYTHON} ./assets/gui.py') #blocking process
 
 
 #Simai documentation
