@@ -211,6 +211,7 @@ class SongPlayer():
         #load bar to read
         pygame.mixer.music.load(self.musicpath)
         threading.Thread(target=self.load_music, daemon=True).start()
+        font = pygame.Font
         
         # here need finetune offset
         # time.sleep(1)
@@ -242,6 +243,7 @@ class SongPlayer():
             # Tick FRAMERATE times per second
             FRAMERATE = 1/(self.fps.tick()/1000)
             # print(FRAMERATE, end = '\r')
+            
             
             self.display.fill((0,0,0))
             self.display.blit(self.chartimg, self.chartpos)
@@ -336,7 +338,7 @@ class SongPlayer():
                     
                         
             self.display.blit(judgementtext, (w/2 - judgementtext.get_rect().centerx, h/2 -judgementtext.get_rect().centery))
-
+            self.display.blit(font.render)
             pygame.display.update()
         return
 

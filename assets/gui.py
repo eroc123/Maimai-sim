@@ -5,6 +5,8 @@ import io
 import os
 import threading
 from os import walk
+import gc
+import logging
 
 # class GenreSelectionGUI:
 #     def __init__(self,):
@@ -248,7 +250,7 @@ class MainGUI:
         for x,y in buttonpositions:
             buttonpositions[buttonpositions.index((x,y))] = ((0.5-(h * 0.45 * x)/w),0.5-(0.45 * y))
 
-        print(genre)
+        # print(genre)
         pressedlist = []
 
         self.buttonlock = [0,0,0,0,0,0,0,0]
@@ -278,7 +280,8 @@ class MainGUI:
         songsurface.blit(text, (songsurface.get_rect().centerx-text.get_rect().centerx, 0.85*songsurface.get_rect().height))
         background_surface.blit(songsurface, (0.5*w - songsurface.get_rect().centerx,0.55*h-songsurface.get_rect().centery))
         time.sleep(0.5)
-        clock.tick(60)
+        gc.collect()
+        gc.enable()
         self.animate_out(titletext)
         self.animate_in(background_surface)
         clock.tick(60)
@@ -300,7 +303,7 @@ class MainGUI:
                 song = self.songlist[self.currentselection]
                 songsurface = pygame.Surface((0.25*h, 0.30*h))
                 songsurface.fill((255,255,255))
-                print(self.currentselection, self.genreoffset)
+                # print(self.currentselection, self.genreoffset)
 
                 song = self.songlist[self.genreoffset+self.currentselection]
                 
@@ -326,24 +329,26 @@ class MainGUI:
                 if event.type == pygame.QUIT:
                     break
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    event.x,event.y = event.pos
-                    event.x = event.x/w
-                    event.y = event.y/h
-                    for x,y in buttonpositions:
-                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
-                            touch = buttonpositions.index((x,y))
-                            # print(f'Button {touch} down')
-                            pressedlist.append(touch)
-                    print(event.x, event.y)
+                    if not event.touch:
+                        event.x,event.y = event.pos
+                        event.x = event.x/w
+                        event.y = event.y/h
+                        for x,y in buttonpositions:
+                            if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                                touch = buttonpositions.index((x,y))
+                                # print(f'Button {touch} down')
+                                pressedlist.append(touch)
+                    # print(event.x, event.y)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    event.x,event.y = event.pos
-                    event.x = event.x/w
-                    event.y = event.y/h
-                    for x,y in buttonpositions:
-                        if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
-                            touch = buttonpositions.index((x,y))
-                            # print(f'Button {touch} up')
-                            pressedlist.remove(touch)
+                    if not event.touch:
+                        event.x,event.y = event.pos
+                        event.x = event.x/w
+                        event.y = event.y/h
+                        for x,y in buttonpositions:
+                            if event.x >= x - 0.1 and event.x <= x + 0.1 and event.y >= y - 0.1 and event.y <= y + 0.1:
+                                touch = buttonpositions.index((x,y))
+                                # print(f'Button {touch} up')
+                                pressedlist.remove(touch)
                     
                 if event.type == pygame.FINGERDOWN:
                     
@@ -379,7 +384,7 @@ class MainGUI:
                             break
                     self.currentselection = 0
                 self.buttonlock[1] += 1
-            elif self.buttonlock[1] >= 5:
+            elif self.buttonlock[1] >= 1:
                 self.buttonlock[1] = 0
             if 6 in pressedlist:
                 if self.buttonlock[6] == 0:
@@ -400,23 +405,23 @@ class MainGUI:
                             break
                     self.currentselection = 0
                 self.buttonlock[6] += 1
-            elif self.buttonlock[6] >= 5:
+            elif self.buttonlock[6] >= 1:
                 self.buttonlock[6] = 0
                 
             if 2 in pressedlist:
                 if self.buttonlock[2] == 0:
                     self.currentselection += 1
-                    print(self.currentselection)
+                    # print(self.currentselection)
                 self.buttonlock[2] += 1
-            elif self.buttonlock[2] >= 5:
+            elif self.buttonlock[2] >= 1:
                 self.buttonlock[2] = 0
 
             if 5 in pressedlist:
                 if self.buttonlock[5] == 0:
                     self.currentselection -= 1
-                    print(self.currentselection)
+                    # print(self.currentselection)
                 self.buttonlock[5] += 1
-            elif self.buttonlock[5] >= 5:
+            elif self.buttonlock[5] >= 1:
                 self.buttonlock[5] = 0
             
             if 3 in pressedlist:
@@ -429,7 +434,7 @@ class MainGUI:
                     self.animate_in_chart(songsurface)
 
                 self.buttonlock[3] += 1
-            elif self.buttonlock[3] >= 5:
+            elif self.buttonlock[3] >= 1:
                 self.buttonlock[3] = 0
 
             if 4 in pressedlist:
@@ -437,7 +442,7 @@ class MainGUI:
                     pass
 
                 self.buttonlock[4] += 1
-            elif self.buttonlock[4] >= 5:
+            elif self.buttonlock[4] >= 1:
                 self.buttonlock[4] = 0
 
             if 0 in pressedlist:
@@ -446,7 +451,7 @@ class MainGUI:
                     if self.diffcuilty >= len(diffcuiltynames)-1:
                         self.diffcuilty = len(diffcuiltynames)-1
                 self.buttonlock[0] += 1
-            elif self.buttonlock[0] >= 5:
+            elif self.buttonlock[0] >= 1:
                 self.buttonlock[0] = 0
 
             if 7 in pressedlist:
@@ -455,12 +460,12 @@ class MainGUI:
                     if self.diffcuilty <= 0:
                         self.diffcuilty = 0
                 self.buttonlock[7] += 1
-            elif self.buttonlock[7] >= 5:
+            elif self.buttonlock[7] >= 1:
                 self.buttonlock[7] = 0
-            diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], False, (0,0,0))
+            diffcuilty_surface = font.render(diffcuiltynames[self.diffcuilty], True, (0,0,0))
             self.display.blit(diffcuilty_surface, (w/2 - diffcuilty_surface.get_rect().centerx,100))
 
-                
+            
                 
             pygame.display.update()
             clock.tick(60)
@@ -486,5 +491,6 @@ class Chart:
 
 
 c = MainGUI()
+gc.disable()
 c.read_charts()
 c.run()
