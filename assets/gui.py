@@ -114,7 +114,7 @@ class MainGUI:
                 
         path=f'./tmp/'+song.path[:-11]
         # print(path)
-        c = sim.SongPlayer(path,self.display,3,self.diffcuilty)
+        c = sim.SongPlayer(path,self.display,6.5 ,self.diffcuilty)
         c.play()
     def animate_in(self, img):
         display_size = pygame.display.Info().current_w , pygame.display.Info().current_h
@@ -296,6 +296,7 @@ class MainGUI:
             self.display.blit(self.textsurface, ((0.5*w )- (self.textsurface.get_rect().centerx), 0.30*h - self.textsurface.get_rect().centery))
             if self.currentselection < 0:
                 self.currentselection = 0
+            self.nextgenreindex = 0
             if self.currentselection > self.nextgenreindex-self.genreoffset:
                 self.currentselection = self.oldselection
             if self.oldselection != self.currentselection:

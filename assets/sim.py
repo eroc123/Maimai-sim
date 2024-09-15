@@ -1,9 +1,16 @@
-import pygame, math, time, threading
+import pygame, math, time, threading, os
 FRAMERATE = 60
-
+import psutil
 pygame.init()
 pygame.mixer.init()
+def check_performance():
+    process = psutil.Process(os.getpid())  # Get current process ID
+    cpu_percent = process.cpu_percent(interval=0.1)  # CPU usage
+    memory_info = process.memory_info()  # Memory usage
 
+    # Display performance data
+    print(f"CPU Usage: {cpu_percent}%")
+    print(f"Memory Usage: {memory_info.rss / 1024 ** 2:.2f} MB")  # Convert bytes to MB
 if __name__ == '__main__':
     pygame.display.init()
     display = pygame.display.set_mode((0,0))
@@ -15,7 +22,7 @@ from loader import phrase_simai
 
 
 
-def getChart(path, diffcuilty):
+def getChart(path, diffcuilty, speed):
     #return loader.phrase_simai(simaichart)
     with open(path+'/maidata.txt', 'rb') as f:
         simaichart = f.read()
@@ -33,7 +40,7 @@ def getChart(path, diffcuilty):
     # print(simaichart)
     simaichart = '\n'.join(simaichart)
     print(simaichart)
-    chart = phrase_simai(simaichart, diffcuilty)
+    chart = phrase_simai(simaichart, diffcuilty, speed)
     musicpath = path+'/track.mp3'
     return chart, musicpath
 
@@ -53,7 +60,7 @@ class SongPlayer():
         self.baseTime = 60 #in ticks. 60 ticks in a second. Time taken for note to go from summon ring to judgement line with a speed of one
         self.baseTimeMs = 1000 #base time in miliseconds
         speedMultiplerFactor = (speed-1)/3 + 1
-        timeTicks = int(self.baseTime/speedMultiplerFactor)
+        timeTicks = int(self.baseTime/speedMultiplerFactor) #time taken for note to go from summon ring to judgement line adjusted for speed
         timeMs = int(self.baseTimeMs/speedMultiplerFactor)
         #self.metronometick1 = pygame.mixer.Sound("./assets/sounds/tick1.wav") 
         #self.metronometick2 = pygame.mixer.Sound("./assets/sounds/tick2.wav")
@@ -67,9 +74,9 @@ class SongPlayer():
         self.speed = int((self.radiusConst - self.summonRing) / timeTicks)    #this is in pixels per tick.
 
         self.speedMs = int((self.radiusConst - self.summonRing) / timeMs)
-        print(self.speed)
+        print(self.speed, "notespeed")
         self.fps = pygame.time.Clock()
-        self.phrasedchart, self.musicpath = getChart(path, diffcuilty)
+        self.phrasedchart, self.musicpath = getChart(path, diffcuilty, self.speed)
 
         # print(self.phrasedchart)
 
@@ -91,10 +98,10 @@ class SongPlayer():
         for note in self.activebuffer:
             if note.name ==  'HoldNote':
                 note.elapsedDuration += 1 
-                
+                note.sprite[2].elapsedDuration += 1 
                 if int(note.elapsedDuration) == int(note.holdDuration):
 
-                   
+                    
                     note.sprite[1].locked = False
                 
 
@@ -178,7 +185,7 @@ class SongPlayer():
 
                 # if game is inconsistant, check actualms to compare the actual milisecond time plaused and compare to the tpb
                 actualms = pygame.time.delay(tpb)
-                
+                print(actualms - tpb, "timing difference")
 
                 # since each loop cycle is 1/16th of the beat, incrument 1/16
                 currentbarfraction += 1/16
@@ -250,14 +257,26 @@ class SongPlayer():
 
             for note in self.activebuffer:
 
-                for sprites in note.sprite:
+                for spriteindex, sprites in enumerate(note.sprite):
                    
                     img, pos = sprites.update(self.speed/(FRAMERATE/60))
+                    if note.name == "HoldNote" and spriteindex != 2:
+                        if not math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.2 :
+                            self.display.blit(img, pos) #blit everything that hasnt crossed judgement
+        
+                        elif spriteindex == 1 and math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.2:
+                            self.activebuffer.remove(note) #if tail has passed judgement, delete hold from memoery
+                    elif spriteindex == 2: #same deal here but for segments so for loop must be implemented
                         
+                        for segment in img:
+                            if not math.sqrt((pos[0] - self.center[0] + segment[0].get_rect().centerx)**2 + (pos[1] - self.center[1] + segment[0].get_rect().centery)**2) > self.radiusConst * 1.2:
+                                self.display.blit(segment[0], segment[1])
+                            else:
+                                img.remove(segment)
                         
-                    if math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.2:
+                    elif math.sqrt((pos[0] - self.center[0] + img.get_rect().centerx)**2 + (pos[1] - self.center[1] + img.get_rect().centery)**2) > self.radiusConst * 1.2 :
                         if note.name == "TapNote":
-                            judgementtext = judgement.render('Miss', False, (255,255,255))
+                            #judgementtext = judgement.render('Miss', False, (255,255,255))
                             self.activebuffer.remove(note)
                             # self.display.blit(judgementtext, ((0.5*w )- (judgementtext.get_rect().centerx), 0.5*h - judgementtext.get_rect().centery))
                             # print('Miss')
@@ -269,7 +288,6 @@ class SongPlayer():
                             #     self.activebuffer.remove(note)
 
                     else:
-                        
                         self.display.blit(img, pos)
                 
             
@@ -518,7 +536,7 @@ class SongPlayer():
 
 if __name__ == '__main__':
     path = './tmp/ゲームバラエティ/1051_DESTR0YER_DX'
-    c = SongPlayer(path,display,3,1)
+    c = SongPlayer(path,display,6,1)
     
     c.play()
 
