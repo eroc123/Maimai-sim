@@ -45,10 +45,13 @@ def check_memory():
     usage = psutil.Process().memory_info().rss / (1024 * 1024)
     logging.debug(f'Currently using {usage} MB of memory')
 
+
 def debug():
     while True:
         check_memory()
         time.sleep(5)
+    
+
 def get_size(bytes, suffix="B"):
     """
     Scale bytes to its proper format
